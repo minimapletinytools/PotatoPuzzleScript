@@ -5,6 +5,7 @@ module PPSTypes(
   headerStrings,
   Object,
   Color,
+  white,
   ObjExpr(..),
   ObjBinOp(..),
   ObjectMap, LegendMap,
@@ -27,6 +28,9 @@ headerStrings = ["OBJECTS", "LEGEND", "SOUNDS", "COLLISIONLAYERS", "RULES", "WIN
 
 type Object = String
 type Color = String
+
+white :: Color
+white = "white"
 
 type ObjectMap = Map.Map Object Color
 type LegendMap = Map.Map Char ObjExpr

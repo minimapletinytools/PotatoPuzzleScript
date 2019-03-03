@@ -3,7 +3,12 @@
 module PPSParser(
   testParse,
   parseHeaderAny,
-  potatoParse
+  potatoParse,
+
+  -- TODO make internal, exposed for testing
+  parseObjects,
+  parseLegend
+
 ) where
 
 import PPSTypes
@@ -40,7 +45,7 @@ parseHeader h = do
     let
       hs = show h
     many1 (char '=') >> endOfLine
-    headerString <- try (string hs) <?> hs
+    try (string hs) <?> hs
     endOfLine
     many1 (char '=') >> endOfLine
     -- add it to the headers we saw
@@ -79,6 +84,7 @@ parseLegend = do
   PT.whiteSpace
   manyTillHeaderOrEoF $ do
     (key:[]) <- PT.identifier <|> PT.operator <?> "unreserved character"
+    -- TODO fail on duplicate keys
     PT.reservedOp "="
     value <- PT.objExprAndOnlyFromObjectMap objects <?> "recognized object"
     modifyState (over legend (Map.insert key value))
@@ -89,7 +95,7 @@ parseRest :: PotatoParser ()
 parseRest = do
   h <- parseHeaderAny
   modifyState (over headers (h:))
-  commands <- manyTillHeaderOrEoF parseLine
+  manyTillHeaderOrEoF parseLine
   void eof <|> parseRest
 
 -- | parseSections_ takes a list of parser tuples

@@ -30,7 +30,6 @@ P = Player
 * = Crate
 @ = Crate and Target
 O = Target
-D = sthaoeu
 
 =======
 SOUNDS
