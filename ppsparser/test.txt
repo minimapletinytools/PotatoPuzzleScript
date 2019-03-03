@@ -1,0 +1,69 @@
+title My Game
+author Anonymous
+homepage www.puzzlescript.net
+
+========
+OBJECTS
+========
+Background
+GREEN
+
+Target
+DarkBlue
+
+Wall
+BROWN
+
+Player
+Blue
+
+Crate
+Orange
+
+=======
+LEGEND
+=======
+
+A = Background
+# = Wall
+P = Player
+* = Crate
+@ = Crate and Target
+O = Target
+
+=======
+SOUNDS
+=======
+
+================
+COLLISIONLAYERS
+================
+
+Background
+Target
+Player, Wall, Crate
+
+======
+RULES
+======
+
+[ >  Player | Crate ] -> [  >  Player | > Crate  ]
+[ >  Player | > Crate ] -> [  >  Player | v Crate  ]
+
+==============
+WINCONDITIONS
+==============
+
+All Target on Crate
+
+=======
+LEVELS
+=======
+
+#########
+#.......#
+#.....@.#
+#.P.*.O.#
+#.......#
+#.......#
+#########
