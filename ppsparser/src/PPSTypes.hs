@@ -7,6 +7,7 @@ module PPSTypes(
   Color,
   ObjExpr(..),
   ObjBinOp(..),
+  ObjectMap, LegendMap,
   Output(..),
   title, author, homepage, headers, objectList, legend,
   emptyOutput,
@@ -27,6 +28,9 @@ headerStrings = ["OBJECTS", "LEGEND", "SOUNDS", "COLLISIONLAYERS", "RULES", "WIN
 type Object = String
 type Color = String
 
+type ObjectMap = Map.Map Object Color
+type LegendMap = Map.Map Char ObjExpr
+
 data ObjExpr = ObjConst Object | Not ObjExpr | ObjBin ObjBinOp ObjExpr ObjExpr deriving (Show)
 data ObjBinOp = And | Or deriving (Show)
 
@@ -35,8 +39,8 @@ data Output = Output {
     _author :: String,
     _homepage :: String,
     _headers :: [Header],
-    _objectList :: Map.Map Object Color,
-    _legend :: Map.Map Char ObjExpr
+    _objectList :: ObjectMap,
+    _legend :: LegendMap
 } deriving (Show)
 
 makeLenses ''Output

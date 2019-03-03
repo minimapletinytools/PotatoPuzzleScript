@@ -12,7 +12,6 @@ import Control.Monad
 import qualified Data.Text as T
 import qualified Data.Map as Map
 import Text.Parsec
-import Text.Parsec.Text
 
 import Lens.Micro.Platform
 
@@ -67,9 +66,8 @@ parseTitles = do
 
 parseObjects :: PotatoParser ()
 parseObjects = do
-  parseHeader OBJECTS
   PT.whiteSpace
-  many $ do
+  manyTillHeaderOrEoF $ do
     ident <- PT.identifier
     color <- PT.identifier
     modifyState (over objectList (Map.insert ident color))
@@ -77,13 +75,12 @@ parseObjects = do
 
 parseLegend :: PotatoParser ()
 parseLegend = do
-  objects <- getState
-  parseHeader LEGEND
+  objects <- getState >>= return . _objectList
   PT.whiteSpace
   manyTillHeaderOrEoF $ do
     (key:[]) <- PT.identifier <|> PT.operator <?> "unreserved character"
     PT.reservedOp "="
-    value <- PT.objExprAndOnly
+    value <- PT.objExprAndOnlyFromObjectMap objects <?> "recognized object"
     modifyState (over legend (Map.insert key value))
   return ()
 
@@ -93,13 +90,36 @@ parseRest = do
   h <- parseHeaderAny
   modifyState (over headers (h:))
   commands <- manyTillHeaderOrEoF parseLine
-  void eof <|> parseSections
+  void eof <|> parseRest
+
+-- | parseSections_ takes a list of parser tuples
+-- tries to execute first tuple of first element
+-- if fail, go onto next tuple in list and repeat
+-- if success execute and return second element
+-- could probably make this more efficient using ParseT and unparser directly
+parseSection_ :: [(PotatoParser a, PotatoParser ())] -> PotatoParser ()
+parseSection_ [] = return ()
+parseSection_ ((a,b):[]) = try a >> b
+parseSection_ ((a,b):xs) = do
+  -- use Maybe so that we can use <|> with different return types
+  v <- (try a >>= return . Just) <|> (parseSection_ xs >> return Nothing)
+  case v of
+    Nothing -> return ()
+    Just _ -> b
+
 
 parseSections :: PotatoParser ()
 parseSections = do
-  void . many $
-    try parseObjects <|>
-    try parseLegend <|> parseRest
+  -- because of many here, we can't get errors out
+  parseSection_ [
+    (parseHeader OBJECTS, parseObjects)
+    , (parseHeader LEGEND, parseLegend)
+    ]
+  (parseSection_ [
+    (parseHeader OBJECTS, parseObjects)
+    , (parseHeader LEGEND, parseLegend)
+    ] <?> "poo")
+  parseRest <?> "poo"
 
 
 testParse :: PotatoParser ()

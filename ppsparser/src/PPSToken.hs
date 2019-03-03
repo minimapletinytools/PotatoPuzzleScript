@@ -9,13 +9,14 @@ module PPSToken(
   integer,
   semi,
   whiteSpace,
-  objExpr,
-  objExprAndOnly
+  objExprFromObjectMap,
+  objExprAndOnlyFromObjectMap
 ) where
 
 import PPSTypes
 import Text.Parsec
 import Control.Monad.Identity
+import qualified Data.Map as Map
 import qualified Data.Text as T
 import qualified Text.Parsec.Token as Token
 import Text.Parsec.Expr
@@ -82,11 +83,27 @@ bOperators = [ [Prefix (reservedOp "not" >> return (Not             ))          
                 Infix  (reservedOp "or"  >> return (ObjBin Or      )) AssocLeft]
              ]
 
+bTerm :: PotatoParser ObjExpr
+bTerm =  parens objExpr <|> (identifier >>= return . ObjConst)
+
 objExpr :: PotatoParser ObjExpr
 objExpr = buildExpressionParser bOperators bTerm
 
 objExprAndOnly :: PotatoParser ObjExpr
 objExprAndOnly = buildExpressionParser [[bAnd]] bTerm
 
-bTerm =  parens objExpr
-     <|> (identifier >>= return . ObjConst)
+
+
+bTermFromObjectMap :: ObjectMap -> PotatoParser ObjExpr
+bTermFromObjectMap lm =  parens objExpr <|>
+  (do
+    ident <- identifier
+    guard $ Map.member ident lm
+    return . ObjConst $ ident) <?>
+  "valid member"
+
+objExprFromObjectMap :: ObjectMap -> PotatoParser ObjExpr
+objExprFromObjectMap lm = try $ buildExpressionParser bOperators (bTermFromObjectMap lm)
+
+objExprAndOnlyFromObjectMap ::ObjectMap -> PotatoParser ObjExpr
+objExprAndOnlyFromObjectMap lm = try $ buildExpressionParser [[bAnd]] (bTermFromObjectMap lm)

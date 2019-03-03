@@ -8,6 +8,6 @@ import Text.Parsec
 main :: IO ()
 main = do
   text1 <- T.readFile "test.txt"
-  text2 <- T.readFile "test2.txt"
-  print $ runParser parseHeaderAny emptyOutput "(unknown)" text2
+  --text2 <- T.readFile "test2.txt"
+  --print $ runParser parseHeaderAny emptyOutput "(unknown)" text2
   print $ runParser potatoParse emptyOutput "(unknown)" text1
