@@ -9,6 +9,10 @@ module PPSToken(
   integer,
   semi,
   whiteSpace,
+  commaSep,
+
+  objConstFromObjectMap,
+  objTermFromObjectMap,
   objExprFromObjectMap,
   objExprAndOnlyFromObjectMap
 ) where
@@ -75,6 +79,7 @@ parens     = Token.parens     lexer -- parses surrounding parenthesis:
 integer    = Token.integer    lexer -- parses an integer
 semi       = Token.semi       lexer -- parses a semicolon
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
+commaSep = Token.commaSep lexer
 
 
 bAnd = Infix  (reservedOp "and" >> return (ObjBin And     )) AssocLeft
@@ -83,27 +88,28 @@ bOperators = [ [Prefix (reservedOp "not" >> return (Not             ))          
                 Infix  (reservedOp "or"  >> return (ObjBin Or      )) AssocLeft]
              ]
 
+-- prob delete these
 bTerm :: PotatoParser ObjExpr
 bTerm =  parens objExpr <|> (identifier >>= return . ObjConst)
-
 objExpr :: PotatoParser ObjExpr
 objExpr = buildExpressionParser bOperators bTerm
-
 objExprAndOnly :: PotatoParser ObjExpr
 objExprAndOnly = buildExpressionParser [[bAnd]] bTerm
 
+objConstFromObjectMap :: ObjectMap -> PotatoParser Object
+objConstFromObjectMap lm = (do
+  ident <- identifier
+  guard $ Map.member ident lm
+  return ident) <?> "valid member"
 
+objTermFromObjectMap :: ObjectMap -> PotatoParser ObjExpr
+objTermFromObjectMap lm = objConstFromObjectMap lm >>= return . ObjConst
 
-bTermFromObjectMap :: ObjectMap -> PotatoParser ObjExpr
-bTermFromObjectMap lm =  parens objExpr <|>
-  (do
-    ident <- identifier
-    guard $ Map.member ident lm
-    return . ObjConst $ ident) <?>
-  "valid member"
+bTermFromObjectMap :: ObjectMap -> (ObjectMap -> PotatoParser ObjExpr) -> PotatoParser ObjExpr
+bTermFromObjectMap lm exprParser =  parens (exprParser lm) <|> objTermFromObjectMap lm
 
 objExprFromObjectMap :: ObjectMap -> PotatoParser ObjExpr
-objExprFromObjectMap lm = try $ buildExpressionParser bOperators (bTermFromObjectMap lm)
+objExprFromObjectMap lm = try $ buildExpressionParser bOperators (bTermFromObjectMap lm objExprFromObjectMap)
 
 objExprAndOnlyFromObjectMap ::ObjectMap -> PotatoParser ObjExpr
-objExprAndOnlyFromObjectMap lm = try $ buildExpressionParser [[bAnd]] (bTermFromObjectMap lm)
+objExprAndOnlyFromObjectMap lm = try $ buildExpressionParser [[bAnd]] (bTermFromObjectMap lm objExprAndOnlyFromObjectMap)

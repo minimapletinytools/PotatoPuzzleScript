@@ -51,7 +51,6 @@ dependencies:
 - containers
 - microlens-platform
 - mtl
-- QuickCheck
 - bytestring
 
 library:
@@ -78,3 +77,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - ppsparser
+    - QuickCheck
+    - quickcheck-io
+    - HUnit

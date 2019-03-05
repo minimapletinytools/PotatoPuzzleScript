@@ -27,3 +27,8 @@ Just started. Working on parsers.
 - support full PuzzleScript markup language, with appropriate 🥔 modifications where it makes sense
 - design and implement 🥔PuzzleScript language capable of expressing mechanics of [Stephen's Sausage Roll](https://www.increpare.com/2016/04/stephens-sausage-roll/) and [English Country Tune](https://www.increpare.com/2011/11/english-country-tune/)
 - level editor
+
+
+## Notable Changes from PuzzleScript
+
+- no collision layers, as these can be represented in 3D

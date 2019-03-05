@@ -28,12 +28,13 @@ A = Background
 # = Wall
 P = Player
 * = Crate
-@ = Crate and Target
+@ = Crate
 O = Target
 
 =======
 SOUNDS
 =======
+
 
 ================
 COLLISIONLAYERS

@@ -50,6 +50,7 @@ parseHeader h = do
     many1 (char '=') >> endOfLine
     -- add it to the headers we saw
     modifyState (over headers (h:))
+    PT.whiteSpace
     return h
 
 
@@ -71,7 +72,6 @@ parseTitles = do
 
 parseObjects :: PotatoParser ()
 parseObjects = do
-  PT.whiteSpace
   manyTillHeaderOrEoF $ do
     ident <- PT.identifier
     color <- PT.identifier
@@ -81,13 +81,60 @@ parseObjects = do
 parseLegend :: PotatoParser ()
 parseLegend = do
   objects <- getState >>= return . _objectList
-  PT.whiteSpace
   manyTillHeaderOrEoF $ do
     (key:[]) <- PT.identifier <|> PT.operator <?> "unreserved character"
     -- TODO fail on duplicate keys
     PT.reservedOp "="
-    value <- PT.objExprAndOnlyFromObjectMap objects <?> "recognized object"
+    value <- PT.objExprFromObjectMap objects <?> "recognized object"
     modifyState (over legend (Map.insert key value))
+  return ()
+
+parseSounds :: PotatoParser ()
+parseSounds = undefined
+
+parseCollisionLayers :: PotatoParser ()
+parseCollisionLayers = do
+  objects <- getState >>= return . _objectList
+  manyTillHeaderOrEoF $ do
+    r <- PT.commaSep PT.identifier
+    PT.whiteSpace
+  return ()
+
+
+--parseObjectTerm :: PotatoParser
+
+parseRules :: PotatoParser ()
+parseRules = do
+  objects <- getState >>= return . _objectList
+  manyTillHeaderOrEoF $ do undefined
+    -- rule
+      -- pattern match
+      -- command
+      -- condition -> rule ?
+      -- rule + rule (creates one execution group)
+    -- pattern match
+      -- (optional modifier) [term] -> [term]
+    -- condition
+      -- (optional modifier) [term] // does this conflict with pattern match style rules above?
+      -- varCondition
+    -- command
+      -- cancel
+      -- varModify
+      -- win
+
+    --modifyState (over legend (Map.insert key value))
+  return ()
+
+parseWinConditions :: PotatoParser ()
+parseWinConditions = do
+  objects <- getState >>= return . _objectList
+  PT.whiteSpace
+  manyTillHeaderOrEoF $ do undefined
+    -- no/all/some [object] (optional [positional term] [object])
+    -- positional term
+      -- on (means +1 Z-axis)
+      -- other ones??
+    --modifyState (over legend (Map.insert key value))
   return ()
 
 -- DELETE ME when done
@@ -117,15 +164,12 @@ parseSection_ ((a,b):xs) = do
 parseSections :: PotatoParser ()
 parseSections = do
   -- because of many here, we can't get errors out
-  parseSection_ [
+  -- TODO move repeat behavior into parseSection_ so you can get errors
+  void . many $ parseSection_ [
     (parseHeader OBJECTS, parseObjects)
     , (parseHeader LEGEND, parseLegend)
     ]
-  (parseSection_ [
-    (parseHeader OBJECTS, parseObjects)
-    , (parseHeader LEGEND, parseLegend)
-    ] <?> "poo")
-  parseRest <?> "poo"
+  parseRest
 
 
 testParse :: PotatoParser ()

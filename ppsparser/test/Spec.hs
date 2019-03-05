@@ -6,6 +6,7 @@ import PPSTypes
 
 import Text.Parsec
 
+import qualified Data.Text.IO as T
 import Data.List (nub)
 import qualified Data.Set as Set
 import qualified Data.Map as Map
@@ -15,6 +16,8 @@ import qualified Data.ByteString.Lazy as B
 import Data.ByteString.Builder
 
 import Test.QuickCheck
+import Test.QuickCheck.IO
+import Test.HUnit.Lang
 
 --import Debug.Trace (trace)
 
@@ -62,6 +65,14 @@ prop_parseLegend_pass (LegendTuples tuples) = pass where
 
 prop_parseLegend_fail :: LegendTuples -> Bool
 prop_parseLegend_fail (LegendTuples tuples) = not $ prop_parseLegend_pass (LegendTuples (('*',"thisobjectdoesnotexist"):tuples))
+
+prop_parseFile_pass_1 :: Property
+prop_parseFile_pass_1 = propertyIO $ do
+  text1 <- T.readFile "test.txt"
+  -- simpler way to do this o_o?
+  case runParser potatoParse emptyOutput "(unknown)" text1 of
+    Left x -> assertFailure (show x)
+    Right _ -> return ()
 
 -- TODO test for duplicate legend keys when it's supported
 
