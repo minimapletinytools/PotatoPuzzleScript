@@ -78,5 +78,3 @@ tests:
     dependencies:
     - ppsparser
     - QuickCheck
-    - quickcheck-io
-    - HUnit

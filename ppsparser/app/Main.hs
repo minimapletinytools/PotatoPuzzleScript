@@ -2,7 +2,7 @@ module Main where
 
 import PPSParser
 import PPSTypes
-import qualified Data.Text.IO as T 
+import qualified Data.Text.IO as T
 import Text.Parsec
 
 main :: IO ()

@@ -7,7 +7,8 @@ module PPSParser(
 
   -- TODO make internal, exposed for testing
   parseObjects,
-  parseLegend
+  parseLegend,
+  parseCollisionLayers
 
 ) where
 
@@ -89,14 +90,16 @@ parseLegend = do
     modifyState (over legend (Map.insert key value))
   return ()
 
+-- TODO
 parseSounds :: PotatoParser ()
-parseSounds = undefined
+parseSounds = void $ manyTillHeaderOrEoF parseLine
 
 parseCollisionLayers :: PotatoParser ()
 parseCollisionLayers = do
   objects <- getState >>= return . _objectList
   manyTillHeaderOrEoF $ do
-    r <- PT.commaSep PT.identifier
+    r <- PT.commaSep (PT.objConstFromObjectMap objects)
+    modifyState (over collisionLayers (r:))
     PT.whiteSpace
   return ()
 
@@ -106,7 +109,7 @@ parseCollisionLayers = do
 parseRules :: PotatoParser ()
 parseRules = do
   objects <- getState >>= return . _objectList
-  manyTillHeaderOrEoF $ do undefined
+  manyTillHeaderOrEoF parseLine
     -- rule
       -- pattern match
       -- command
@@ -129,7 +132,7 @@ parseWinConditions :: PotatoParser ()
 parseWinConditions = do
   objects <- getState >>= return . _objectList
   PT.whiteSpace
-  manyTillHeaderOrEoF $ do undefined
+  manyTillHeaderOrEoF $ parseLine
     -- no/all/some [object] (optional [positional term] [object])
     -- positional term
       -- on (means +1 Z-axis)
@@ -137,13 +140,15 @@ parseWinConditions = do
     --modifyState (over legend (Map.insert key value))
   return ()
 
--- DELETE ME when done
-parseRest :: PotatoParser ()
-parseRest = do
-  h <- parseHeaderAny
-  modifyState (over headers (h:))
-  manyTillHeaderOrEoF parseLine
-  void eof <|> parseRest
+parseLevels :: PotatoParser ()
+parseLevels = do
+  state <- getState
+  let
+    objects = _objectList state
+    legend = _legend state
+  PT.whiteSpace
+  manyTillHeaderOrEoF $ parseLine
+  return ()
 
 -- | parseSections_ takes a list of parser tuples
 -- tries to execute first tuple of first element
@@ -168,8 +173,14 @@ parseSections = do
   void . many $ parseSection_ [
     (parseHeader OBJECTS, parseObjects)
     , (parseHeader LEGEND, parseLegend)
+    , (parseHeader SOUNDS, parseSounds)
+    , (parseHeader COLLISIONLAYERS, parseCollisionLayers)
+    , (parseHeader RULES, parseRules)
+    , (parseHeader WINCONDITIONS, parseWinConditions)
+    , (parseHeader LEVELS, parseLevels)
     ]
-  parseRest
+  PT.whiteSpace
+  void eof
 
 
 testParse :: PotatoParser ()
@@ -187,7 +198,8 @@ potatoParse = do
       _homepage = titles Map.! "homepage",
       _headers = [],
       _objectList = Map.empty,
-      _legend = Map.empty
+      _legend = Map.empty,
+      _collisionLayers = []
     }
   parseSections
   getState

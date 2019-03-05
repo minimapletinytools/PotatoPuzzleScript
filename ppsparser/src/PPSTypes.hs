@@ -10,7 +10,7 @@ module PPSTypes(
   ObjBinOp(..),
   ObjectMap, LegendMap,
   Output(..),
-  title, author, homepage, headers, objectList, legend,
+  title, author, homepage, headers, objectList, legend, collisionLayers,
   emptyOutput,
   PotatoParser
 ) where
@@ -44,7 +44,8 @@ data Output = Output {
     _homepage :: String,
     _headers :: [Header],
     _objectList :: ObjectMap,
-    _legend :: LegendMap
+    _legend :: LegendMap,
+    _collisionLayers :: [[Object]]
 } deriving (Show)
 
 makeLenses ''Output

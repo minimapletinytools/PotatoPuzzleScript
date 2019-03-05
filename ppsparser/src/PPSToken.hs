@@ -96,6 +96,8 @@ objExpr = buildExpressionParser bOperators bTerm
 objExprAndOnly :: PotatoParser ObjExpr
 objExprAndOnly = buildExpressionParser [[bAnd]] bTerm
 
+-- TODO rename all these to use known as prefix
+-- objConstKnown
 objConstFromObjectMap :: ObjectMap -> PotatoParser Object
 objConstFromObjectMap lm = (do
   ident <- identifier
