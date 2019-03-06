@@ -86,7 +86,7 @@ parseLegend = do
     (key:[]) <- PT.identifier <|> PT.operator <?> "unreserved character"
     -- TODO fail on duplicate keys
     PT.reservedOp "="
-    value <- PT.objExprFromObjectMap objects <?> "recognized object"
+    value <- PT.legendRhsExpr objects <?> "recognized object"
     modifyState (over legend (Map.insert key value))
   return ()
 
@@ -98,7 +98,8 @@ parseCollisionLayers :: PotatoParser ()
 parseCollisionLayers = do
   objects <- getState >>= return . _objectList
   manyTillHeaderOrEoF $ do
-    r <- PT.commaSep (PT.objConstFromObjectMap objects)
+    -- parse each layer as comma separated objects
+    r <- PT.commaSep (PT.objConstKnown objects)
     modifyState (over collisionLayers (r:))
     PT.whiteSpace
   return ()
@@ -170,6 +171,7 @@ parseSections :: PotatoParser ()
 parseSections = do
   -- because of many here, we can't get errors out
   -- TODO move repeat behavior into parseSection_ so you can get errors
+  -- TODO add error if parsing unrecognized header
   void . many $ parseSection_ [
     (parseHeader OBJECTS, parseObjects)
     , (parseHeader LEGEND, parseLegend)
