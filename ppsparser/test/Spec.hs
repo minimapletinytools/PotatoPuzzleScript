@@ -42,6 +42,9 @@ prop_hasNoDups xs = hasNoDups xs === (nub xs == xs)
 defaultObjects :: [String]
 defaultObjects = map (\x -> "Obj"++show x) [(1::Int)..20]
 
+anObject :: String
+anObject = head defaultObjects
+
 defaultOutput :: Output
 defaultOutput = emptyOutput {
     _objectList = Map.fromList (map (,white) defaultObjects)
@@ -101,7 +104,16 @@ prop_parseFile_pass_1 = monadicIO $ assert =<< (run $ do
 -- TODO test for duplicate legend keys when it's supported
 
 
+prop_isWinConditionExpr :: Property
+prop_isWinConditionExpr = monadicIO $ do
+  assert . isWinConditionExpr $ ObjUn Some (ObjConst anObject)
+  assert . isWinConditionExpr $ ObjBin On (ObjUn Some (ObjConst anObject)) (ObjConst anObject)
+  assert . not . isWinConditionExpr $ ObjConst anObject
+  assert . not . isWinConditionExpr $ ObjBin On (ObjConst anObject) (ObjConst anObject)
 
+-- TODO
+--prop_parseWinConditions :: [(KnownObjects, KnownObjects)] -> Bool
+--prop_parseWinConditions pairs = pass where
 
 --Template haskell nonsense to run all properties prefixed with "prop_" in this file
 return []
