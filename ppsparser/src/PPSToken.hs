@@ -13,7 +13,8 @@ module PPSToken(
 
   objKnown,
   objTermKnown,
-  legendRhsExpr
+  legendRhsExpr,
+  winConditionExpr
 ) where
 
 import PPSTypes
@@ -59,8 +60,9 @@ languageDef =
                                      , "and"
                                      , "or"
                                      ]
-           , Token.reservedOpNames = ["=", "not", "all", "some", "no", "and", "or", "not", "arrow"
+           , Token.reservedOpNames = ["=", "not", "All", "Some", "No", "and", "or", "not", "arrow"
                                      ]
+           --, Token.caseSensitive   = False
            }
 
 lexer = Token.makeTokenParser languageDef
@@ -81,21 +83,18 @@ commaSep = Token.commaSep lexer
 
 
 -- in order of precedence
+opAll = Prefix (reservedOp "All" >> return (UnExpr All))
+opSome = Prefix (reservedOp "Some" >> return (UnExpr Some))
+opNo = Prefix (reservedOp "No" >> return (UnExpr No             ))
 opNot = Prefix (reservedOp "not" >> return (UnExpr Not))
-opAll = Prefix (reservedOp "all" >> return (UnExpr All))
-opSome = Prefix (reservedOp "some" >> return (UnExpr Some))
-opNo = Prefix (reservedOp "no" >> return (UnExpr No             ))
 opAnd = Infix  (reservedOp "and" >> return (BinExpr And     )) AssocLeft
 opOr = Infix  (reservedOp "or"  >> return (BinExpr Or      )) AssocLeft
 opArrow = Infix  (reservedOp "arrow"  >> return (BinExpr Arrow      )) AssocNone
 opOn = Infix  (reservedOp "on"  >> return (BinExpr On      )) AssocNone
 
 legendExprOperators = [[opAnd, opOr]]
-winConditionsExprOperators = [[opNot, opAll, opSome], [opOn]]
+winConditionsExprOperators = [[opNo, opAll, opSome], [opOn]]
 
-bOperators = [ [opNot]
-             , [opAnd, opOr]
-             ]
 
 -- TODO rename all these to use known as prefix
 -- ConstExprKnown
@@ -115,7 +114,7 @@ legendRhsExpr lm = try $ buildExpressionParser legendExprOperators (termParser l
 winConditionExpr :: ObjectMap -> PotatoParser Expr
 winConditionExpr lm = (try $ do
   let
-    termParser lm' = winConditionExpr lm <|> objTermKnown lm
+    termParser lm' = parens (winConditionExpr lm) <|> objTermKnown lm
   expr <- buildExpressionParser winConditionsExprOperators (termParser lm)
   guard $ isWinConditionExpr expr
   return expr) <?> "valid win condition expression"

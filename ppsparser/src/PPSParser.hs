@@ -133,12 +133,11 @@ parseWinConditions :: PotatoParser ()
 parseWinConditions = do
   objects <- getState >>= return . _objectList
   PT.whiteSpace
-  manyTillHeaderOrEoF $ parseLine
-    -- no/all/some [object] (optional [positional term] [object])
-    -- positional term
-      -- on (means +1 Z-axis)
-      -- other ones??
-    --modifyState (over legend (Map.insert key value))
+  manyTillHeaderOrEoF $ do
+    -- parse each layer as comma separated objects
+    r <- PT.winConditionExpr objects
+    modifyState (over winConditions (r:))
+    PT.whiteSpace
   return ()
 
 parseLevels :: PotatoParser ()
