@@ -81,7 +81,7 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 commaSep = Token.commaSep lexer
 
 
-opNot = Prefix (reservedOp "not" >> return (Not             ))
+opNot = Prefix (reservedOp "not" >> return (ObjUn Not             ))
 opAnd = Infix  (reservedOp "and" >> return (ObjBin And     )) AssocLeft
 opOr = Infix  (reservedOp "or"  >> return (ObjBin Or      )) AssocLeft
 

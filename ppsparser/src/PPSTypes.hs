@@ -6,8 +6,9 @@ module PPSTypes(
   Object,
   Color,
   white,
-  ObjExpr(..),
+  ObjUnOp(..),
   ObjBinOp(..),
+  ObjExpr(..),
   ObjectMap, LegendMap,
   Output(..),
   title, author, homepage, headers, objectList, legend, collisionLayers,
@@ -35,8 +36,11 @@ white = "white"
 type ObjectMap = Map.Map Object Color
 type LegendMap = Map.Map Char ObjExpr
 
-data ObjExpr = ObjConst Object | Not ObjExpr | ObjBin ObjBinOp ObjExpr ObjExpr deriving (Show)
+data ObjUnOp = Not deriving (Show)
 data ObjBinOp = And | Or deriving (Show)
+data ObjExpr = ObjConst Object | ObjUn ObjUnOp ObjExpr | ObjBin ObjBinOp ObjExpr ObjExpr deriving (Show)
+
+
 
 data Output = Output {
     _title :: String,
@@ -57,7 +61,8 @@ emptyOutput = Output {
     _homepage = "",
     _headers = [],
     _objectList = Map.empty,
-    _legend = Map.empty
+    _legend = Map.empty,
+    _collisionLayers = []
   }
 
 type PotatoParser = Parsec T.Text Output
