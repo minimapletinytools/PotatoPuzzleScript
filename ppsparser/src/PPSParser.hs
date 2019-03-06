@@ -194,14 +194,10 @@ testParse = do
 potatoParse :: PotatoParser Output
 potatoParse = do
   titles <- parseTitles
-  putState $ Output {
+  putState $ emptyOutput {
       _title = titles Map.! "title",
       _author = titles Map.! "author",
-      _homepage = titles Map.! "homepage",
-      _headers = [],
-      _objectList = Map.empty,
-      _legend = Map.empty,
-      _collisionLayers = []
+      _homepage = titles Map.! "homepage"
     }
   parseSections
   getState
