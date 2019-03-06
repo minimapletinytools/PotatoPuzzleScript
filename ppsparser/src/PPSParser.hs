@@ -99,7 +99,7 @@ parseCollisionLayers = do
   objects <- getState >>= return . _objectList
   manyTillHeaderOrEoF $ do
     -- parse each layer as comma separated objects
-    r <- PT.commaSep (PT.objConstKnown objects)
+    r <- PT.commaSep (PT.objKnown objects)
     modifyState (over collisionLayers (r:))
     PT.whiteSpace
   return ()

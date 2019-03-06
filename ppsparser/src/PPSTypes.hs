@@ -3,17 +3,22 @@
 module PPSTypes(
   Header(..),
   headerStrings,
+
   Object,
   Color,
   white,
-  ObjUnOp(..),
-  ObjBinOp(..),
-  ObjExpr(..),
+
+  UnOp(..),
+  BinOp(..),
+  Expr(..),
   isWinConditionExpr,
+
   ObjectMap, LegendMap,
+
   Output(..),
   title, author, homepage, headers, objectList, legend, collisionLayers, winConditions,
   emptyOutput,
+
   PotatoParser
 ) where
 
@@ -35,28 +40,28 @@ white :: Color
 white = "white"
 
 type ObjectMap = Map.Map Object Color
-type LegendMap = Map.Map Char ObjExpr
+type LegendMap = Map.Map Char Expr
 
-data ObjUnOp = Not
+data UnOp = Not
   | All | No | Some  -- win cond operators
   deriving (Show)
-data ObjBinOp = And | Or | Arrow
+data BinOp = And | Or | Arrow
   | On -- win cond operators
   deriving (Show)
-data ObjExpr = ObjConst Object | ObjUn ObjUnOp ObjExpr | ObjBin ObjBinOp ObjExpr ObjExpr deriving (Show)
+data Expr = ConstExpr Object | UnExpr UnOp Expr | BinExpr BinOp Expr Expr deriving (Show)
 
 
 -- | isWinConditionExpr returns true if the expression is a valid win condition expression
 -- a valid win condition expressions are limited see https://www.puzzlescript.net/Documentation/winconditions.html
 -- for complex win conditions, use rules instead
-isWinConditionExpr :: ObjExpr -> Bool
-isWinConditionExpr (ObjBin On x (ObjConst _)) = isWinConditionExpr_ x
+isWinConditionExpr :: Expr -> Bool
+isWinConditionExpr (BinExpr On x (ConstExpr _)) = isWinConditionExpr_ x
 isWinConditionExpr x = isWinConditionExpr_ x
 
-isWinConditionExpr_ :: ObjExpr -> Bool
-isWinConditionExpr_ (ObjUn All _) = True
-isWinConditionExpr_ (ObjUn No _) = True
-isWinConditionExpr_ (ObjUn Some _) = True
+isWinConditionExpr_ :: Expr -> Bool
+isWinConditionExpr_ (UnExpr All _) = True
+isWinConditionExpr_ (UnExpr No _) = True
+isWinConditionExpr_ (UnExpr Some _) = True
 isWinConditionExpr_ _ = False
 
 data Output = Output {
@@ -67,7 +72,7 @@ data Output = Output {
     _objectList :: ObjectMap,
     _legend :: LegendMap,
     _collisionLayers :: [[Object]],
-    _winConditions :: [ObjExpr]
+    _winConditions :: [Expr]
 } deriving (Show)
 
 makeLenses ''Output

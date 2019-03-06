@@ -11,7 +11,7 @@ module PPSToken(
   whiteSpace,
   commaSep,
 
-  objConstKnown,
+  objKnown,
   objTermKnown,
   legendRhsExpr
 ) where
@@ -81,14 +81,14 @@ commaSep = Token.commaSep lexer
 
 
 -- in order of precedence
-opNot = Prefix (reservedOp "not" >> return (ObjUn Not))
-opAll = Prefix (reservedOp "all" >> return (ObjUn All))
-opSome = Prefix (reservedOp "some" >> return (ObjUn Some))
-opNo = Prefix (reservedOp "no" >> return (ObjUn No             ))
-opAnd = Infix  (reservedOp "and" >> return (ObjBin And     )) AssocLeft
-opOr = Infix  (reservedOp "or"  >> return (ObjBin Or      )) AssocLeft
-opArrow = Infix  (reservedOp "arrow"  >> return (ObjBin Arrow      )) AssocNone
-opOn = Infix  (reservedOp "on"  >> return (ObjBin On      )) AssocNone
+opNot = Prefix (reservedOp "not" >> return (UnExpr Not))
+opAll = Prefix (reservedOp "all" >> return (UnExpr All))
+opSome = Prefix (reservedOp "some" >> return (UnExpr Some))
+opNo = Prefix (reservedOp "no" >> return (UnExpr No             ))
+opAnd = Infix  (reservedOp "and" >> return (BinExpr And     )) AssocLeft
+opOr = Infix  (reservedOp "or"  >> return (BinExpr Or      )) AssocLeft
+opArrow = Infix  (reservedOp "arrow"  >> return (BinExpr Arrow      )) AssocNone
+opOn = Infix  (reservedOp "on"  >> return (BinExpr On      )) AssocNone
 
 legendExprOperators = [[opAnd, opOr]]
 winConditionsExprOperators = [[opNot, opAll, opSome], [opOn]]
@@ -98,21 +98,21 @@ bOperators = [ [opNot]
              ]
 
 -- TODO rename all these to use known as prefix
--- objConstKnown
-objConstKnown :: ObjectMap -> PotatoParser Object
-objConstKnown lm = (do
+-- ConstExprKnown
+objKnown :: ObjectMap -> PotatoParser Object
+objKnown lm = (do
   ident <- identifier
   guard $ Map.member ident lm
   return ident) <?> "known object"
 
-objTermKnown :: ObjectMap -> PotatoParser ObjExpr
-objTermKnown lm = objConstKnown lm >>= return . ObjConst
+objTermKnown :: ObjectMap -> PotatoParser Expr
+objTermKnown lm = objKnown lm >>= return . ConstExpr
 
-legendRhsExpr :: ObjectMap -> PotatoParser ObjExpr
+legendRhsExpr :: ObjectMap -> PotatoParser Expr
 legendRhsExpr lm = try $ buildExpressionParser legendExprOperators (termParser lm) where
   termParser lm' = parens (legendRhsExpr lm) <|> objTermKnown lm
 
-winConditionExpr :: ObjectMap -> PotatoParser ObjExpr
+winConditionExpr :: ObjectMap -> PotatoParser Expr
 winConditionExpr lm = (try $ do
   let
     termParser lm' = winConditionExpr lm <|> objTermKnown lm
