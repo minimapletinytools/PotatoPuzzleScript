@@ -36,8 +36,8 @@ white = "white"
 type ObjectMap = Map.Map Object Color
 type LegendMap = Map.Map Char ObjExpr
 
-data ObjUnOp = Not deriving (Show)
-data ObjBinOp = And | Or deriving (Show)
+data ObjUnOp = Not | All | No | Some deriving (Show)
+data ObjBinOp = And | Or | Arrow deriving (Show)
 data ObjExpr = ObjConst Object | ObjUn ObjUnOp ObjExpr | ObjBin ObjBinOp ObjExpr ObjExpr deriving (Show)
 
 

@@ -59,8 +59,7 @@ languageDef =
                                      , "and"
                                      , "or"
                                      ]
-           , Token.reservedOpNames = ["+", "-", "/", "="
-                                     , "<", ">", "and", "or", "not"
+           , Token.reservedOpNames = ["=", "not", "all", "some", "no", "and", "or", "not", "arrow"
                                      ]
            }
 
@@ -81,9 +80,15 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 commaSep = Token.commaSep lexer
 
 
+-- in order of precedence
 opNot = Prefix (reservedOp "not" >> return (ObjUn Not             ))
+opAll = Prefix (reservedOp "all" >> return (ObjUn All             ))
+opSome = Prefix (reservedOp "some" >> return (ObjUn Some             ))
+opNo = Prefix (reservedOp "no" >> return (ObjUn No             ))
 opAnd = Infix  (reservedOp "and" >> return (ObjBin And     )) AssocLeft
 opOr = Infix  (reservedOp "or"  >> return (ObjBin Or      )) AssocLeft
+opArrow = Infix  (reservedOp "arrow"  >> return (ObjBin Arrow      )) AssocNone
+
 
 legendExprOperators = [[opAnd, opOr]]
 
