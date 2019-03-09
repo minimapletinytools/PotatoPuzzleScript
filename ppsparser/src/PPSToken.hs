@@ -48,20 +48,44 @@ languageDef =
            , Token.commentLine     = "//"
            , Token.identStart      = letter
            , Token.identLetter     = alphaNum
-           , Token.reservedNames   = [ "if"
-                                     , "then"
-                                     , "else"
-                                     , "while"
-                                     , "do"
-                                     , "skip"
-                                     , "true"
-                                     , "false"
-                                     , "not"
-                                     , "and"
-                                     , "or"
+           , Token.reservedNames   = [
+
+                                     -- object ops
+                                      "not"
+                                      , "and"
+                                      , "or"
+
+                                      -- win condition ops
+                                      , "All"
+                                      , "Some"
+                                      , "No"
+
+                                      -- rel orientations
+                                      
+                                      -- abs orientations
+
+
+                                      -- const directions
                                      ]
-           , Token.reservedOpNames = ["=", "not", "All", "Some", "No", "and", "or", "not", "arrow"
+           , Token.reservedOpNames = [
+                                      -- legend ops
+                                      "="
+
+                                      -- object ops
+                                      , "not"
+                                      , "and"
+                                      , "or"
+
+                                      -- rule ops
+                                      , "arrow"
+
+                                      -- win conditions ops
+                                      , "All"
+                                      , "Some"
+                                      , "No"
+
                                      ]
+           -- note that operators are always case sensitive
            --, Token.caseSensitive   = False
            }
 
@@ -97,7 +121,7 @@ winConditionsExprOperators = [[opNo, opAll, opSome], [opOn]]
 
 
 -- TODO rename all these to use known as prefix
--- ConstExprKnown
+-- ObjExprKnown
 objKnown :: ObjectMap -> PotatoParser Object
 objKnown lm = (do
   ident <- identifier
@@ -105,7 +129,7 @@ objKnown lm = (do
   return ident) <?> "known object"
 
 objTermKnown :: ObjectMap -> PotatoParser Expr
-objTermKnown lm = objKnown lm >>= return . ConstExpr
+objTermKnown lm = objKnown lm >>= return . ObjExpr
 
 legendRhsExpr :: ObjectMap -> PotatoParser Expr
 legendRhsExpr lm = try $ buildExpressionParser legendExprOperators (termParser lm) where
