@@ -52,6 +52,7 @@ dependencies:
 - microlens-platform
 - mtl
 - bytestring
+- linear
 
 library:
   source-dirs: src
