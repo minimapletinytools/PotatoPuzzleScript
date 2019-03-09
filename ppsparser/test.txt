@@ -24,7 +24,7 @@ Orange
 LEGEND
 =======
 
-A = Background
+. = Background
 # = Wall
 P = Player
 * = Crate

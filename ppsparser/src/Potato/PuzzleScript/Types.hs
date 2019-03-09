@@ -30,7 +30,7 @@ import Potato.Math.CubeTR
 import qualified Data.Text as T
 import qualified Data.Map as Map
 import Text.Parsec
-import Data.Vector.Unboxed as U
+import qualified Data.Vector.Unboxed as U
 
 import Lens.Micro.Platform
 

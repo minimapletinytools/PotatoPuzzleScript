@@ -17,14 +17,15 @@ import qualified Potato.PuzzleScript.Token as PT
 import Control.Monad
 import qualified Data.Text as T
 import qualified Data.Map as Map
+import qualified Data.Vector.Unboxed as U
 import Text.Parsec
 
 import Lens.Micro.Platform
 
 potatoEndOfLine :: PotatoParser ()
 potatoEndOfLine = void $ many $ do
-    newline
-    many (try (many (oneOf " \t") >> newline))
+    endOfLine
+    many (try (many (oneOf " \t") >> endOfLine))
     return ()
 
 parseLine :: PotatoParser String
@@ -146,7 +147,21 @@ tryFirstThen :: Stream s m t => ParsecT s u m a -> ParsecT s u m b -> ParsecT s 
 tryFirstThen a b = try (a >> b) <|> b
 
 parseLevelSlice :: PotatoParser (Size, LevelSlice)
-parseLevelSlice = undefined
+parseLevelSlice = do
+  state <- getState
+  let
+    legend = _legend state
+    parseLevelLine = do
+      r <- many1 (oneOf (Map.keys legend))
+      many (oneOf " \t") >> endOfLine
+      return r
+  slices <- manyTill parseLevelLine (try (void endOfLine) <|> lookAhead eof)
+  PT.whiteSpace
+  if length slices > 0 then return () else fail "level must only use symbols defined in legend"
+  let x = length (head slices)
+  if all (\x' -> length x' == x) slices then return () else fail "all lines in level must have same length"
+  return ((x, length slices), U.fromList (concat slices))
+
 
 parseLevel :: PotatoParser Level
 parseLevel = do
@@ -163,10 +178,9 @@ parseMultiLevel = do
   name <- tryParseLevelMessage
   PT.symbol "DEPTH"
   x <- PT.natural
-  guard $ x > 0
+  if x > 0 then return () else fail "expected >0 DEPTH"
   slices <- forM [1..x] (const parseLevelSlice)
   -- TODO check that all sizes are the same, why is this so annoying
-  --guard
   return $ Level (fst (slices !! 0)) (map snd slices) name
 
 
