@@ -1,8 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-import PPSParser
-import PPSTypes
+import Potato.PuzzleScript
 
 import Text.Parsec
 

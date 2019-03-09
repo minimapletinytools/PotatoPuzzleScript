@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
-module PPSParser(
+module Potato.PuzzleScript.Parser(
   testParse,
   parseHeaderAny,
   potatoParse,
@@ -12,8 +12,8 @@ module PPSParser(
 
 ) where
 
-import PPSTypes
-import qualified PPSToken as PT
+import Potato.PuzzleScript.Types
+import qualified Potato.PuzzleScript.Token as PT
 import Control.Monad
 import qualified Data.Text as T
 import qualified Data.Map as Map

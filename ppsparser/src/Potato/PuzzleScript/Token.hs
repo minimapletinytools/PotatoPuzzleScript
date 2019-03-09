@@ -1,5 +1,5 @@
 
-module PPSToken(
+module Potato.PuzzleScript.Token(
   identifier,
   reserved,
   operator,
@@ -17,7 +17,7 @@ module PPSToken(
   winConditionExpr
 ) where
 
-import PPSTypes
+import Potato.PuzzleScript.Types
 import Text.Parsec
 import Control.Monad.Identity
 import qualified Data.Map as Map
@@ -61,7 +61,7 @@ languageDef =
                                       , "No"
 
                                       -- rel orientations
-                                      
+
                                       -- abs orientations
 
 

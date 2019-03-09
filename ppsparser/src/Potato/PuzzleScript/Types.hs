@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module PPSTypes(
+module Potato.PuzzleScript.Types (
   Header(..),
   headerStrings,
 
@@ -22,7 +22,7 @@ module PPSTypes(
   PotatoParser
 ) where
 
-import TR
+import Potato.Math.TR
 import qualified Data.Text as T
 import qualified Data.Map as Map
 import Text.Parsec

@@ -8,7 +8,7 @@ Stability   : experimental
 
 -}
 
-module TR
+module Potato.Math.TR
   (
   TR(..)
   ) where

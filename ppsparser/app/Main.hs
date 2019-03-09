@@ -1,7 +1,6 @@
 module Main where
 
-import PPSParser
-import PPSTypes
+import Potato.PuzzleScript
 import qualified Data.Text.IO as T
 import Text.Parsec
 
