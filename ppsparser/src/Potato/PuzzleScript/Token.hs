@@ -7,7 +7,9 @@ module Potato.PuzzleScript.Token(
   charLiteral,
   parens,
   integer,
+  natural,
   semi,
+  symbol,
   whiteSpace,
   commaSep,
 
@@ -101,7 +103,9 @@ parens     = Token.parens     lexer -- parses surrounding parenthesis:
                                     -- takes care of the parenthesis and
                                     -- uses p to parse what's inside them
 integer    = Token.integer    lexer -- parses an integer
+natural = Token.natural lexer
 semi       = Token.semi       lexer -- parses a semicolon
+symbol = Token.symbol lexer
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
 commaSep = Token.commaSep lexer
 

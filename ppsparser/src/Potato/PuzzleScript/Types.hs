@@ -4,6 +4,10 @@ module Potato.PuzzleScript.Types (
   Header(..),
   headerStrings,
 
+  Size,
+  LevelSlice,
+  Level(..),
+
   Object,
   Color,
   white,
@@ -16,7 +20,7 @@ module Potato.PuzzleScript.Types (
   ObjectMap, LegendMap,
 
   Output(..),
-  title, author, homepage, headers, objectList, legend, collisionLayers, winConditions,
+  title, author, homepage, headers, objectList, legend, collisionLayers, winConditions, levels,
   emptyOutput,
 
   PotatoParser
@@ -26,6 +30,7 @@ import Potato.Math.CubeTR
 import qualified Data.Text as T
 import qualified Data.Map as Map
 import Text.Parsec
+import Data.Vector.Unboxed as U
 
 import Lens.Micro.Platform
 
@@ -39,6 +44,10 @@ type Object = String
 type Color = String
 white :: Color
 white = "white"
+
+type Size = (Int, Int)
+type LevelSlice = U.Vector Char
+data Level = Level Size [LevelSlice] String deriving(Show)
 
 -- | TODO Matrix var support
 --type Matrix = String
@@ -104,7 +113,8 @@ data Output = Output {
     _objectList :: ObjectMap,
     _legend :: LegendMap,
     _collisionLayers :: [[Object]],
-    _winConditions :: [Expr]
+    _winConditions :: [Expr],
+    _levels :: [Level]
 } deriving (Show)
 
 makeLenses ''Output
@@ -118,7 +128,8 @@ emptyOutput = Output {
     _objectList = Map.empty,
     _legend = Map.empty,
     _collisionLayers = [],
-    _winConditions = []
+    _winConditions = [],
+    _levels = []
   }
 
 type PotatoParser = Parsec T.Text Output

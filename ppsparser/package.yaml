@@ -54,6 +54,7 @@ dependencies:
 - bytestring
 - linear
 - deepseq
+- vector
 
 library:
   source-dirs: src

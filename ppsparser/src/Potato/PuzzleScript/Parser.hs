@@ -140,6 +140,37 @@ parseWinConditions = do
     PT.whiteSpace
   return ()
 
+
+
+tryFirstThen :: Stream s m t => ParsecT s u m a -> ParsecT s u m b -> ParsecT s u m b
+tryFirstThen a b = try (a >> b) <|> b
+
+parseLevelSlice :: PotatoParser (Size, LevelSlice)
+parseLevelSlice = undefined
+
+parseLevel :: PotatoParser Level
+parseLevel = do
+  name <- tryParseLevelMessage
+  slice <- parseLevelSlice
+  return $ Level  (fst slice) [snd slice] name
+
+-- we don't use token here because we want don't want it to skip eol in case there is nothing after MESSAGE
+tryParseLevelMessage :: PotatoParser String
+tryParseLevelMessage = (string "MESSAGE" >> parseLine) <|> return ""
+
+parseMultiLevel :: PotatoParser Level
+parseMultiLevel = do
+  name <- tryParseLevelMessage
+  PT.symbol "DEPTH"
+  x <- PT.natural
+  guard $ x > 0
+  slices <- forM [1..x] (const parseLevelSlice)
+  -- TODO check that all sizes are the same, why is this so annoying
+  --guard
+  return $ Level (fst (slices !! 0)) (map snd slices) name
+
+
+
 parseLevels :: PotatoParser ()
 parseLevels = do
   state <- getState
@@ -147,7 +178,9 @@ parseLevels = do
     objects = _objectList state
     legend = _legend state
   PT.whiteSpace
-  manyTillHeaderOrEoF $ parseLine
+  manyTillHeaderOrEoF $ do
+    level <- parseMultiLevel <|> parseLevel <?> "valid level definition"
+    modifyState (over levels (level:))
   return ()
 
 -- | parseSections_ takes a list of parser tuples
