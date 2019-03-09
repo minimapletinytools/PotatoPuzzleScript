@@ -53,6 +53,7 @@ dependencies:
 - mtl
 - bytestring
 - linear
+- deepseq
 
 library:
   source-dirs: src

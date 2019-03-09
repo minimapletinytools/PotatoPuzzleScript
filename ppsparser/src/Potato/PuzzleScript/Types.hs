@@ -22,7 +22,7 @@ module Potato.PuzzleScript.Types (
   PotatoParser
 ) where
 
-import Potato.Math.TR
+import Potato.Math.CubeTR
 import qualified Data.Text as T
 import qualified Data.Map as Map
 import Text.Parsec
