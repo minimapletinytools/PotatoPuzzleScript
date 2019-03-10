@@ -15,7 +15,7 @@ module Potato.PuzzleScript.Types (
   UnOp(..),
   BinOp(..),
   Expr(..),
-  isWinCondition,
+
 
   ObjectMap, LegendMap,
 
@@ -23,7 +23,14 @@ module Potato.PuzzleScript.Types (
   title, author, homepage, headers, objectList, legend, collisionLayers, winConditions, levels,
   emptyOutput,
 
-  PotatoParser
+  PotatoParser,
+
+  -- internal stuff
+  -- TODO eventually do the internal module trick
+  isObjBinOn,
+  isSingleObject,
+  isPatternObject,
+  isWinCondition
 ) where
 
 import Potato.Math.Integral.TR
@@ -40,8 +47,11 @@ headerStrings :: [String]
 headerStrings = ["OBJECTS", "LEGEND", "SOUNDS", "COLLISIONLAYERS", "RULES", "WINCONDITIONS", "LEVELS"]
 
 type Object = String
+-- TODO make Object var for "..."
 type Orientation = String
 type Velocity = String
+type Command = String
+
 
 type Color = String
 white :: Color
@@ -81,11 +91,14 @@ type LegendMap = Map.Map Char Expr
 data UnOp = Not
   | All | No | Some  -- win cond operators
   deriving (Show, Eq)
-data BinOp = And | Or | Arrow
+data BinOp =
+  And | Or -- boolean operators
+  | Arrow -- rule operators
   | On -- win cond operators
+  | Pipe -- pattern operators (assoc right)
   deriving (Show, Eq)
 
---data ObjExpr = StaticObjExpr Object | OrientObjExpr ObjExpr | BinOp ObjExpr ObjExpr
+--data ObjExpr = ObjectExpr Object | OrientObjExpr ObjExpr | BinOp ObjExpr ObjExpr
 --data PatternExpr_ = PatternExpr_ deriving (Show)
 --data PatternExpr = PatternExpr deriving (Show)
 --data RuleExpr = RuleExpr deriving (Show)
@@ -94,13 +107,21 @@ data BinOp = And | Or | Arrow
 
 
 data Expr =
+  -- whatevers
+  TrueExpr | FalseExpr
+  | IntExpr Int
   -- object
-  StaticObjExpr Object | OrientObjExpr Orientation Expr | MovingObjExpr Velocity Expr
--- | ModObjExpr ObjMod ObjMod Object
+  | ObjectExpr Object | OrientObjExpr Orientation Expr | MovingObjExpr Velocity Expr
+  -- command
+  | CommandExpr Command
+  -- rules
+  | ScopedRuleExpr Velocity Expr
 
 
   | UnExpr UnOp Expr
   | BinExpr BinOp Expr Expr deriving (Show)
+
+
 
 -- | isObjBinOp returns true if the binary operator is a valid object operator
 isObjBinOn :: BinOp -> Bool
@@ -108,24 +129,53 @@ isObjBinOn And = True
 isObjBinOn Or = True
 isObjBinOn _ = False
 
--- | isSingleObjet returns true if the expression is a valid single object
+-- | isBooleanBinOn returns true if the binary operator is a valid Boolean operator
+isBooleanBinOp :: BinOp -> Bool
+isBooleanBinOp = isObjBinOn -- happens to be the same
+
+-- |
+isPatternBinOp :: BinOp -> Bool
+isPatternBinOp x = x == Pipe
+
+-- | isSingleObjet returns true if the expression is a valid SingleObject
 -- SingleObject = Object | Orientation Object
 isSingleObject :: Expr -> Bool
-isSingleObject (StaticObjExpr _) = True
-isSingleObject (OrientObjExpr _ (StaticObjExpr _)) = True
+isSingleObject (ObjectExpr _) = True
+isSingleObject (OrientObjExpr _ (ObjectExpr _)) = True
 isSingleObject _ = False
-
--- | isPatternObject returns true if the expression is a valid object in a pattern
--- PatternObject = SingleObject | Velocity SingleObject
-isPatternObject :: Expr -> Bool
-isPatternObject (MovingObjExpr _ x) = isSingleObject x
-isPatternObject x = isSingleObject x
 
 -- | isBasicObject returns true if the expression is a valid basic object (no modifiers)
 --isBasicObject :: Expr -> Bool
 --isBasicObject (BinExpr x a b) = isObjBinOn x && isBasicObject a && isBasicObject b
 --isBasicObject x = isSingleObject x
 
+-- | isPatternObject returns true if the expression is a valid object in a PatternObject
+-- PatternObject = SingleObject | Velocity SingleObject
+isPatternObject :: Expr -> Bool
+isPatternObject (MovingObjExpr _ x) = isSingleObject x
+isPatternObject x = isSingleObject x
+
+-- |
+-- Pattern = PatternObject | PatternObject pipe Pattern
+isPattern :: Expr -> Bool
+isPattern (BinExpr x a b) = isPatternBinOp x && isPattern a && isPattern b -- assoc right not required this way
+isPattern x = isPatternObject x
+
+-- | isBoolean returns true if the expression is a valid Boolean
+-- Boolean = TrueExpr | FalseExpr | Boolean
+-- TODO algebraic operators
+isBoolean :: Expr -> Bool
+isBoolean TrueExpr = True
+isBoolean FalseExpr = True
+isBoolean (BinExpr x a b) = isBooleanBinOp x && isBoolean a && isBoolean b
+isBoolean _ = False
+
+-- | isRule returns true if the expression is a valid rule expression
+-- Rule = Command | Velocity Pattern -> Pattern | Velocity Pattern -> Rule | Boolean -> rule
+isRule :: Expr -> Bool
+isRule (CommandExpr _) = True
+isRule (ScopedRuleExpr _ (BinExpr Arrow a b)) = isPattern a && (isRule b || isPattern b)
+isRule (BinExpr Arrow a b) = isBoolean a && isRule b
 
 
 -- | isBasicWinCondition returns true if the expression is a valid basic win condition expression
@@ -141,7 +191,7 @@ isBasicWinCondition _ = False
 -- a valid win condition expressions are limited see https://www.puzzlescript.net/Documentation/winconditions.html
 -- for complex win conditions, use rules instead
 isWinCondition :: Expr -> Bool
-isWinCondition (BinExpr On x (StaticObjExpr _)) = isBasicWinCondition x
+isWinCondition (BinExpr On x (ObjectExpr _)) = isBasicWinCondition x
 isWinCondition x = isBasicWinCondition x
 
 
