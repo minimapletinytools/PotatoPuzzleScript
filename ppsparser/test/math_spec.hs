@@ -1,6 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
+
+import Potato.Math.Integral.Rot
+import Potato.Math.Integral.TR
+
 import Test.QuickCheck
 
 prop_TODO :: Bool

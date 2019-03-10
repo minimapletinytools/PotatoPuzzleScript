@@ -26,7 +26,7 @@ module Potato.PuzzleScript.Types (
   PotatoParser
 ) where
 
-import Potato.Math.CubeTR
+import Potato.Math.Integral.TR
 import qualified Data.Text as T
 import qualified Data.Map as Map
 import Text.Parsec
@@ -40,6 +40,8 @@ headerStrings :: [String]
 headerStrings = ["OBJECTS", "LEGEND", "SOUNDS", "COLLISIONLAYERS", "RULES", "WINCONDITIONS", "LEVELS"]
 
 type Object = String
+type Orientation = String
+type Velocity = String
 
 type Color = String
 white :: Color
@@ -78,16 +80,42 @@ type LegendMap = Map.Map Char Expr
 
 data UnOp = Not
   | All | No | Some  -- win cond operators
-  deriving (Show)
+  deriving (Show, Eq)
 data BinOp = And | Or | Arrow
   | On -- win cond operators
-  deriving (Show)
+  deriving (Show, Eq)
 
-data Expr = ObjExpr Object
-  -- | ModObjExpr ObjMod ObjMod Object
+--data ObjExpr = StaticObjExpr Object | OrientObjExpr ObjExpr | BinOp ObjExpr ObjExpr
+--data PatternExpr_ = PatternExpr_ deriving (Show)
+--data PatternExpr = PatternExpr deriving (Show)
+--data RuleExpr = RuleExpr deriving (Show)
+
+
+
+
+data Expr =
+  StaticObjExpr Object | OrientObjExpr Orientation Expr | MovingObjExpr Velocity Expr
+-- | ModObjExpr ObjMod ObjMod Object
+
+
   | UnExpr UnOp Expr
   | BinExpr BinOp Expr Expr deriving (Show)
 
+
+-- | isSingleObjet returns true if the expression is a valid single object
+isSingleObject :: Expr -> Bool
+isSingleObject (StaticObjExpr _) = True
+isSingleObject _ = False
+
+-- | isBasicObject returns true if the expression is a valid basic object (no modifiers)
+isBasicObject :: Expr -> Bool
+isBasicObject (BinExpr x a b) = (x == And || x == Or) && isBasicObject a && isBasicObject b
+isBasicObject x = isSingleObject x
+
+-- | isPatternObject returns true if the expression is a valid object in a pattern
+isPatternObject :: Expr -> Bool
+isPatternObject (StaticObjExpr _) = True
+isPatternObject x = isBasicObject x
 
 -- | isModObjExpr returns true if the expression is a valid modified object expression
 --isModObjExpr :: Expr -> Bool
@@ -96,7 +124,7 @@ data Expr = ObjExpr Object
 -- a valid win condition expressions are limited see https://www.puzzlescript.net/Documentation/winconditions.html
 -- for complex win conditions, use rules instead
 isWinConditionExpr :: Expr -> Bool
-isWinConditionExpr (BinExpr On x (ObjExpr _)) = isWinConditionExpr_ x
+isWinConditionExpr (BinExpr On x (StaticObjExpr _)) = isWinConditionExpr_ x
 isWinConditionExpr x = isWinConditionExpr_ x
 
 isWinConditionExpr_ :: Expr -> Bool

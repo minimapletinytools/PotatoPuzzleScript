@@ -105,10 +105,10 @@ prop_parseFile_pass_1 = monadicIO $ assert =<< (run $ do
 
 prop_isWinConditionExpr :: Property
 prop_isWinConditionExpr = monadicIO $ do
-  assert . isWinConditionExpr $ UnExpr Some (ObjExpr anObject)
-  assert . isWinConditionExpr $ BinExpr On (UnExpr Some (ObjExpr anObject)) (ObjExpr anObject)
-  assert . not . isWinConditionExpr $ ObjExpr anObject
-  assert . not . isWinConditionExpr $ BinExpr On (ObjExpr anObject) (ObjExpr anObject)
+  assert . isWinConditionExpr $ UnExpr Some (StaticObjExpr anObject)
+  assert . isWinConditionExpr $ BinExpr On (UnExpr Some (StaticObjExpr anObject)) (StaticObjExpr anObject)
+  assert . not . isWinConditionExpr $ StaticObjExpr anObject
+  assert . not . isWinConditionExpr $ BinExpr On (StaticObjExpr anObject) (StaticObjExpr anObject)
 
 -- TODO
 --prop_parseWinConditions :: [(KnownObjects, KnownObjects)] -> Bool

@@ -133,7 +133,7 @@ objKnown lm = (do
   return ident) <?> "known object"
 
 objTermKnown :: ObjectMap -> PotatoParser Expr
-objTermKnown lm = objKnown lm >>= return . ObjExpr
+objTermKnown lm = objKnown lm >>= return . StaticObjExpr
 
 legendRhsExpr :: ObjectMap -> PotatoParser Expr
 legendRhsExpr lm = try $ buildExpressionParser legendExprOperators (termParser lm) where
