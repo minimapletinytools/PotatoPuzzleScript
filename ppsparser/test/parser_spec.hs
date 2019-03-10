@@ -103,12 +103,12 @@ prop_parseFile_pass_1 = monadicIO $ assert =<< (run $ do
 -- TODO test for duplicate legend keys when it's supported
 
 
-prop_isWinConditionExpr :: Property
-prop_isWinConditionExpr = monadicIO $ do
-  assert . isWinConditionExpr $ UnExpr Some (StaticObjExpr anObject)
-  assert . isWinConditionExpr $ BinExpr On (UnExpr Some (StaticObjExpr anObject)) (StaticObjExpr anObject)
-  assert . not . isWinConditionExpr $ StaticObjExpr anObject
-  assert . not . isWinConditionExpr $ BinExpr On (StaticObjExpr anObject) (StaticObjExpr anObject)
+prop_isWinCondition :: Property
+prop_isWinCondition = monadicIO $ do
+  assert . isWinCondition $ UnExpr Some (StaticObjExpr anObject)
+  assert . isWinCondition $ BinExpr On (UnExpr Some (StaticObjExpr anObject)) (StaticObjExpr anObject)
+  assert . not . isWinCondition $ StaticObjExpr anObject
+  assert . not . isWinCondition $ BinExpr On (StaticObjExpr anObject) (StaticObjExpr anObject)
 
 -- TODO
 --prop_parseWinConditions :: [(KnownObjects, KnownObjects)] -> Bool

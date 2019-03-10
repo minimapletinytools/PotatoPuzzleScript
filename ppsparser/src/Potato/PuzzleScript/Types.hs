@@ -15,7 +15,7 @@ module Potato.PuzzleScript.Types (
   UnOp(..),
   BinOp(..),
   Expr(..),
-  isWinConditionExpr,
+  isWinCondition,
 
   ObjectMap, LegendMap,
 
@@ -94,6 +94,7 @@ data BinOp = And | Or | Arrow
 
 
 data Expr =
+  -- object
   StaticObjExpr Object | OrientObjExpr Orientation Expr | MovingObjExpr Velocity Expr
 -- | ModObjExpr ObjMod ObjMod Object
 
@@ -101,37 +102,48 @@ data Expr =
   | UnExpr UnOp Expr
   | BinExpr BinOp Expr Expr deriving (Show)
 
+-- | isObjBinOp returns true if the binary operator is a valid object operator
+isObjBinOn :: BinOp -> Bool
+isObjBinOn And = True
+isObjBinOn Or = True
+isObjBinOn _ = False
 
 -- | isSingleObjet returns true if the expression is a valid single object
+-- SingleObject = Object | Orientation Object
 isSingleObject :: Expr -> Bool
 isSingleObject (StaticObjExpr _) = True
+isSingleObject (OrientObjExpr _ (StaticObjExpr _)) = True
 isSingleObject _ = False
 
--- | isBasicObject returns true if the expression is a valid basic object (no modifiers)
-isBasicObject :: Expr -> Bool
-isBasicObject (BinExpr x a b) = (x == And || x == Or) && isBasicObject a && isBasicObject b
-isBasicObject x = isSingleObject x
-
 -- | isPatternObject returns true if the expression is a valid object in a pattern
+-- PatternObject = SingleObject | Velocity SingleObject
 isPatternObject :: Expr -> Bool
-isPatternObject (StaticObjExpr _) = True
-isPatternObject x = isBasicObject x
+isPatternObject (MovingObjExpr _ x) = isSingleObject x
+isPatternObject x = isSingleObject x
 
--- | isModObjExpr returns true if the expression is a valid modified object expression
---isModObjExpr :: Expr -> Bool
+-- | isBasicObject returns true if the expression is a valid basic object (no modifiers)
+--isBasicObject :: Expr -> Bool
+--isBasicObject (BinExpr x a b) = isObjBinOn x && isBasicObject a && isBasicObject b
+--isBasicObject x = isSingleObject x
 
--- | isWinConditionExpr returns true if the expression is a valid win condition expression
+
+
+-- | isBasicWinCondition returns true if the expression is a valid basic win condition expression
+-- BasicWinCondition = All/No/Some SingleObject
+isBasicWinCondition :: Expr -> Bool
+isBasicWinCondition (UnExpr All _) = True
+isBasicWinCondition (UnExpr No _) = True
+isBasicWinCondition (UnExpr Some _) = True
+isBasicWinCondition _ = False
+
+-- | isWinCondition returns true if the expression is a valid win condition expression
+-- WinCondition = BasicWinCondition | BasicWinCondition On SingleObject
 -- a valid win condition expressions are limited see https://www.puzzlescript.net/Documentation/winconditions.html
 -- for complex win conditions, use rules instead
-isWinConditionExpr :: Expr -> Bool
-isWinConditionExpr (BinExpr On x (StaticObjExpr _)) = isWinConditionExpr_ x
-isWinConditionExpr x = isWinConditionExpr_ x
+isWinCondition :: Expr -> Bool
+isWinCondition (BinExpr On x (StaticObjExpr _)) = isBasicWinCondition x
+isWinCondition x = isBasicWinCondition x
 
-isWinConditionExpr_ :: Expr -> Bool
-isWinConditionExpr_ (UnExpr All _) = True
-isWinConditionExpr_ (UnExpr No _) = True
-isWinConditionExpr_ (UnExpr Some _) = True
-isWinConditionExpr_ _ = False
 
 data Output = Output {
     _title :: String,
