@@ -13,13 +13,14 @@ module Potato.PuzzleScript.Token(
   whiteSpace,
   commaSep,
 
-  objKnown,
-  objTermKnown,
-  legendRhsExpr,
-  winConditionExpr
+  --objKnown,
+  --objTermKnown,
+  --legendRhsExpr,
+  --winConditionExpr
 ) where
 
 import Potato.PuzzleScript.Types
+import Potato.PuzzleScript.ParserOutput
 import Text.Parsec
 import Control.Monad.Identity
 import qualified Data.Map as Map
@@ -73,13 +74,13 @@ languageDef =
                                       -- legend ops
                                       "="
 
-                                      -- object ops
+                                      -- object/boolean ops
                                       , "not"
                                       , "and"
                                       , "or"
 
                                       -- rule ops
-                                      , "arrow"
+                                      , "->"
 
                                       -- win conditions ops
                                       , "All"
@@ -110,6 +111,9 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 commaSep = Token.commaSep lexer
 
 
+
+--DELETE
+{-
 -- in order of precedence
 opAll = Prefix (reservedOp "All" >> return (UnExpr All))
 opSome = Prefix (reservedOp "Some" >> return (UnExpr Some))
@@ -146,3 +150,4 @@ winConditionExpr lm = (try $ do
   expr <- buildExpressionParser winConditionsExprOperators (termParser lm)
   guard $ isWinCondition expr
   return expr) <?> "valid win condition expression"
+-}

@@ -9,32 +9,47 @@ module Potato.PuzzleScript.Types (
   Level(..),
 
   Object,
+  Orientation,
+  Velocity,
+  Command,
   Color,
-  white,
+  LegendKey,
+  ObjectMap, VelocityMap, OrientationMap, LegendMap,
 
-  UnOp(..),
-  BinOp(..),
-  Expr(..),
+  orientations,
+  knownVelocities,
+
+  BooleanBinOp(..),
+  Boolean(..),
+
+  ObjBinOp(..),
+  SingleObject(..),
+  ObjectExpr(..),
+  LegendExpr(..),
+
+  WinUnOp(..),
+  WinBinOp(..),
+  BasicWinCond(..),
+  WinCond(..),
+
+  PatBinOp(..),
+  PatternObj(..),
+  Pattern,
+
+  RuleBinOp(..),
+  Command,
+  UnscopedRule(..),
+  Rule(..),
 
 
-  ObjectMap, LegendMap,
-
-  Output(..),
-  title, author, homepage, headers, objectList, legend, collisionLayers, winConditions, levels,
-  emptyOutput,
-
-  PotatoParser,
-
-  -- internal stuff
-  -- TODO eventually do the internal module trick
-  isObjBinOn,
-  isSingleObject,
-  isPatternObject,
-  isWinCondition
+  --isObjBinOn,
+  --isSingleObject,
+  --isPatternObject,
+  --isWinCondition
 ) where
 
 import Potato.Math.Integral.TR
-import qualified Data.Text as T
+
 import qualified Data.Map as Map
 import Text.Parsec
 import qualified Data.Vector.Unboxed as U
@@ -51,42 +66,57 @@ type Object = String
 type Orientation = String
 type Velocity = String
 type Command = String
-
-
 type Color = String
-white :: Color
-white = "white"
+
+type VelocityMap = Map.Map Velocity TR
+type OrientationMap = Map.Map Orientation Rotation
+
+-- TODO finish
+orientations :: OrientationMap
+orientations = Map.fromList [("R_UP", undefined)]
+type ObjectMap = Map.Map Object Color
+type LegendKey = Char
+type LegendMap = Map.Map LegendKey ObjectExpr
+
 
 type Size = (Int, Int)
 type LevelSlice = U.Vector Char
 data Level = Level Size [LevelSlice] String deriving(Show)
 
--- | TODO Matrix var support
---type Matrix = String
 
--- | ObjMod represents an object modifier token
--- there are two distinct types of ObjMod VelMod and RotMod
--- RotMod represents orientation of an object
--- VelMod represents velocity of a moving object
--- then there are two distinct categories of ObjMod Static and Contextual
--- contextual mods match several patterns and create a context object that is used later on in the pattern matching
--- (note a static mod is just a contextual mod that uses itself as the context)
---type ObjMod = String
---type VelMod = String
---type RotMod = String
+knownVelocities :: VelocityMap
+knownVelocities = Map.fromList []
 
--- context is hierarchical
-  -- [up obj1 |> down obj2 |> right obj3] -> [any obj1 |> any obj2 |> any obj3]
-    -- RHS anys gets replaced with up down right in that order
-  -- [up obj1 |> (any obj2 |^ relforward obj3) |> relforward obj4 ] -> [any obj1 |> any obj2 |> any obj3 |> any obj3]
-    -- relforward obj3 is matched with <rotation of obj2> obj3
-    -- relforward obj4 is matched with up obj4 and is next to obj2 <-- this is a little weird but makes it easier to express some patterns than if we chose obj3 here
---RotMods
---ignore, matched with all rots on LHS, can only be replaced with ignore or static mods on RHS
---any, matched with all rots on LHS, sets current rot as context
 
-type ObjectMap = Map.Map Object Color
-type LegendMap = Map.Map Char Expr
+
+
+data BooleanBinOp = And | Or deriving(Show)
+data Boolean = Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean deriving(Show)
+
+data ObjBinOp = And_Obj | Or_Obj deriving(Show)
+data SingleObject = SingleObject Object | SingleObject_Orientation Orientation Object deriving(Show)
+data ObjectExpr = ObjectExpr_Single SingleObject| ObjectExpr_Bin ObjBinOp ObjectExpr ObjectExpr deriving(Show)
+
+data LegendExpr = LegendExpr Char ObjectExpr
+
+data WinUnOp = Win_All | Win_Some | Win_No deriving(Show)
+data WinBinOp = Win_On deriving(Show)
+data BasicWinCond = BasicWinCond WinUnOp SingleObject deriving(Show)
+-- TODO rename to WinCondExpr
+data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond SingleObject deriving(Show)
+
+data PatBinOp = Pipe deriving(Show)
+data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity Velocity SingleObject deriving(Show)
+type Pattern = [PatternObj]
+
+data RuleBinOp = Arrow deriving(Show)
+data UnscopedRule = UnscopedRule_Pattern Pattern Pattern | UnscopedRule_Rule Pattern Rule | UnscopedRuleBoolean Boolean Rule deriving(Show)
+data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Show)
+
+
+
+
+{-
 
 data UnOp = Not
   | All | No | Some  -- win cond operators
@@ -97,14 +127,6 @@ data BinOp =
   | On -- win cond operators
   | Pipe -- pattern operators (assoc right)
   deriving (Show, Eq)
-
---data ObjExpr = ObjectExpr Object | OrientObjExpr ObjExpr | BinOp ObjExpr ObjExpr
---data PatternExpr_ = PatternExpr_ deriving (Show)
---data PatternExpr = PatternExpr deriving (Show)
---data RuleExpr = RuleExpr deriving (Show)
-
-
-
 
 data Expr =
   -- whatevers
@@ -194,32 +216,4 @@ isWinCondition :: Expr -> Bool
 isWinCondition (BinExpr On x (ObjectExpr _)) = isBasicWinCondition x
 isWinCondition x = isBasicWinCondition x
 
-
-data Output = Output {
-    _title :: String,
-    _author :: String,
-    _homepage :: String,
-    _headers :: [Header],
-    _objectList :: ObjectMap,
-    _legend :: LegendMap,
-    _collisionLayers :: [[Object]],
-    _winConditions :: [Expr],
-    _levels :: [Level]
-} deriving (Show)
-
-makeLenses ''Output
-
-emptyOutput :: Output
-emptyOutput = Output {
-    _title = "",
-    _author = "",
-    _homepage = "",
-    _headers = [],
-    _objectList = Map.empty,
-    _legend = Map.empty,
-    _collisionLayers = [],
-    _winConditions = [],
-    _levels = []
-  }
-
-type PotatoParser = Parsec T.Text Output
+-}

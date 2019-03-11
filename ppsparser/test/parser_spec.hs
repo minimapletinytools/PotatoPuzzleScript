@@ -46,7 +46,7 @@ anObject = head defaultObjects
 
 defaultOutput :: Output
 defaultOutput = emptyOutput {
-    _objectList = Map.fromList (map (,white) defaultObjects)
+    _objectList = Map.fromList (map (,"white") defaultObjects)
   }
 
 newtype KnownObjects = KnownObjects [String] deriving (Show)
@@ -102,13 +102,14 @@ prop_parseFile_pass_1 = monadicIO $ assert =<< (run $ do
 
 -- TODO test for duplicate legend keys when it's supported
 
-
+{-
 prop_isWinCondition :: Property
 prop_isWinCondition = monadicIO $ do
   assert . isWinCondition $ UnExpr Some (ObjectExpr anObject)
   assert . isWinCondition $ BinExpr On (UnExpr Some (ObjectExpr anObject)) (ObjectExpr anObject)
   assert . not . isWinCondition $ ObjectExpr anObject
   assert . not . isWinCondition $ BinExpr On (ObjectExpr anObject) (ObjectExpr anObject)
+-}
 
 -- TODO
 --prop_parseWinConditions :: [(KnownObjects, KnownObjects)] -> Bool

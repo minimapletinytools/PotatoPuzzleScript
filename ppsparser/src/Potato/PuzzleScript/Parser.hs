@@ -13,6 +13,8 @@ module Potato.PuzzleScript.Parser(
 ) where
 
 import Potato.PuzzleScript.Types
+import Potato.PuzzleScript.ParserOutput
+import Potato.PuzzleScript.ExpressionParsers
 import qualified Potato.PuzzleScript.Token as PT
 import Control.Monad
 import qualified Data.Text as T
@@ -82,12 +84,9 @@ parseObjects = do
 
 parseLegend :: PotatoParser ()
 parseLegend = do
-  objects <- getState >>= return . _objectList
+  om <- getState >>= return . _objectList
   manyTillHeaderOrEoF $ do
-    (key:[]) <- PT.identifier <|> PT.operator <?> "unreserved character"
-    -- TODO fail on duplicate keys
-    PT.reservedOp "="
-    value <- PT.legendRhsExpr objects <?> "recognized object"
+    LegendExpr key value <- parse_LegendExpr om
     modifyState (over legend (Map.insert key value))
   return ()
 
@@ -100,7 +99,8 @@ parseCollisionLayers = do
   objects <- getState >>= return . _objectList
   manyTillHeaderOrEoF $ do
     -- parse each layer as comma separated objects
-    r <- PT.commaSep (PT.objKnown objects)
+    -- TODO switch to SingleObject
+    r <- PT.commaSep (parse_Object objects)
     modifyState (over collisionLayers (r:))
     PT.whiteSpace
   return ()
@@ -132,11 +132,11 @@ parseRules = do
 
 parseWinConditions :: PotatoParser ()
 parseWinConditions = do
-  objects <- getState >>= return . _objectList
+  om <- getState >>= return . _objectList
   PT.whiteSpace
   manyTillHeaderOrEoF $ do
     -- parse each layer as comma separated objects
-    r <- PT.winConditionExpr objects
+    r <- parse_WinCond om
     modifyState (over winConditions (r:))
     PT.whiteSpace
   return ()
