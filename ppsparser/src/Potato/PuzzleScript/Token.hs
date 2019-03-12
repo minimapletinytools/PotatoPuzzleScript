@@ -6,6 +6,7 @@ module Potato.PuzzleScript.Token(
   reservedOp,
   charLiteral,
   parens,
+  brackets,
   integer,
   natural,
   semi,
@@ -79,6 +80,9 @@ languageDef =
                                       , "and"
                                       , "or"
 
+                                      -- pattern ops
+                                      , "|"
+
                                       -- rule ops
                                       , "->"
 
@@ -99,10 +103,8 @@ reserved   = Token.reserved   lexer -- parses a reserved name
 operator = Token.operator lexer
 reservedOp = Token.reservedOp lexer -- parses an operator
 charLiteral = Token.charLiteral lexer
-parens     = Token.parens     lexer -- parses surrounding parenthesis:
-                                    --   parens p
-                                    -- takes care of the parenthesis and
-                                    -- uses p to parse what's inside them
+parens     = Token.parens     lexer
+brackets = Token.brackets lexer
 integer    = Token.integer    lexer -- parses an integer
 natural = Token.natural lexer
 semi       = Token.semi       lexer -- parses a semicolon

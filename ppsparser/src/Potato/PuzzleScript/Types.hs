@@ -91,7 +91,8 @@ knownVelocities = Map.fromList []
 
 
 data BooleanBinOp = And | Or deriving(Show)
-data Boolean = Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean deriving(Show)
+-- TODO add variables
+data Boolean = Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean deriving(Show)
 
 data ObjBinOp = And_Obj | Or_Obj deriving(Show)
 data SingleObject = SingleObject Object | SingleObject_Orientation Orientation Object deriving(Show)
@@ -106,7 +107,9 @@ data BasicWinCond = BasicWinCond WinUnOp SingleObject deriving(Show)
 data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond SingleObject deriving(Show)
 
 data PatBinOp = Pipe deriving(Show)
+-- velocity restricted to single objects for now
 data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity Velocity SingleObject deriving(Show)
+-- TODO may want to add more separators, not just the | that inherits scope
 type Pattern = [PatternObj]
 
 data RuleBinOp = Arrow deriving(Show)

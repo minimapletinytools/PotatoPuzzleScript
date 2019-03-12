@@ -111,23 +111,9 @@ parseCollisionLayers = do
 parseRules :: PotatoParser ()
 parseRules = do
   objects <- getState >>= return . _objectList
+  --rules <- manyTillHeaderOrEoF $ parse_Rule (objects, knownVelocities)
   manyTillHeaderOrEoF parseLine
-    -- rule
-      -- pattern match
-      -- command
-      -- condition -> rule ?
-      -- rule + rule (creates one execution group)
-    -- pattern match
-      -- (optional modifier) [term] -> [term]
-    -- condition
-      -- (optional modifier) [term] // does this conflict with pattern match style rules above?
-      -- varCondition
-    -- command
-      -- cancel
-      -- varModify
-      -- win
-
-    --modifyState (over legend (Map.insert key value))
+  --modifyState (over rules (Map.insert key value))
   return ()
 
 parseWinConditions :: PotatoParser ()
