@@ -17,6 +17,7 @@ module Potato.Math.Integral.TR
   ( Translation
   , Rotation
   , TR(..)
+  , emptyTR
   ) where
 
 import Lens.Micro.Platform
@@ -41,6 +42,9 @@ data TR = TR
   _trans :: Translation
   , _rot :: Rotation
   } deriving (Show, Generic, NFData)
+
+emptyTR :: TR
+emptyTR = TR (V3 0 0 0) (V3 (V3 0 0 0) (V3 0 0 0) (V3 0 0 0))
 
 makeLenses ''TR
 

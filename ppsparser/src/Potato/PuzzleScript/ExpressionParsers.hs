@@ -38,7 +38,8 @@ parse_BooleanBinOp =
 parse_Boolean_Not :: PotatoParser Boolean
 parse_Boolean_Not = do
   PT.reservedOp "Not"
-  parse_Boolean
+  b <- parse_Boolean
+  return $ Boolean_Not b
 
 parse_Boolean_Bin :: PotatoParser Boolean
 parse_Boolean_Bin = do
@@ -49,8 +50,8 @@ parse_Boolean_Bin = do
 
 parse_Boolean :: PotatoParser Boolean
 parse_Boolean =
-  try parse_Boolean_Bin <|>
-  try parse_Boolean_Not <|>
+  try (PT.parens parse_Boolean_Bin) <|>
+  try (PT.parens parse_Boolean_Not) <|>
   try (PT.reserved "True" >> return Boolean_True) <|>
   try (PT.reserved "False" >> return Boolean_False) <?>
   "valid Boolean expression"
@@ -79,7 +80,7 @@ parse_Orientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys 
 
 parse_Velocity :: VelocityMap -> PotatoParser Velocity
 parse_Velocity vm = do
-  name <- PT.identifier
+  name <- PT.identifier <|> PT.operator
   guardError (Map.member name vm) ("unknown velocity " ++ name)
   return name
 
@@ -161,12 +162,14 @@ parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
 parse_UnscopedRule_Pattern :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule_Pattern lm = do
   p1 <- parse_Pattern lm
+  parse_RuleBinOp
   p2 <- parse_Pattern lm
   return $ UnscopedRule_Pattern p1 p2
 
 parse_UnscopedRule_Rule :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule_Rule lm = do
   p <- parse_Pattern lm
+  parse_RuleBinOp
   r <- parse_Rule lm
   return $ UnscopedRule_Rule p r
 
@@ -174,6 +177,7 @@ parse_UnscopedRule_Rule lm = do
 parse_UnscopedRuleBoolean :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRuleBoolean lm = do
   p <- parse_Boolean
+  parse_RuleBinOp
   r <- parse_Rule lm
   return $ UnscopedRuleBoolean p r
 

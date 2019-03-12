@@ -85,7 +85,7 @@ data Level = Level Size [LevelSlice] String deriving(Show)
 
 
 knownVelocities :: VelocityMap
-knownVelocities = Map.fromList []
+knownVelocities = Map.fromList [("v", emptyTR),("^", emptyTR),(">", emptyTR),("<", emptyTR)]
 
 
 
