@@ -30,7 +30,6 @@ R_DOWN: R_BACKWARDS
 
 
 VELOCITIES:
-PVELS:
 RIGHT: T (1,0,0)
 UP: T (0,1,0)
 DOWN: T (0,-1,0)
@@ -41,28 +40,12 @@ M_RIGHT: RIGHT
 M_UP: UP
 M_DOWN: DOWN
 M_LEFT: LEFT
-RVELS:
 TURN_LEFT: R (0,0,π/2)
 TURN_RIGHT: R (0,0,-π/2)
 TURN_PLUSZ: (π/2,0,0)
 TURN_MINUSZ: (-π/2,0,0)
 
 
-
-
-
-rule = command | <scope> patterns -> patterns | <scope> patterns -> rule | bexpr -> rule
-lhs = <scope> patterns | bexpr
-bexpr = TRUE | FALSE | bexpr bop bexpr | algexpr abop algexpr
-algexpr = ...
-scope = TR
-patterns = pattern | pattern patterns
-objExpr = rmod objExpr | objExpr bop objExpr | obj
-rmod =
-vmod =
-pattern = [subpattern]
-subpattern = vmod objExpr | (vmod objExpr pop subpattern) | ...
-pop = |
 
 
 

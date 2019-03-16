@@ -48,6 +48,7 @@ parse_Boolean_Bin = do
   b2 <- parse_Boolean
   return $ Boolean_Bin op b1 b2
 
+-- TODO switch to expression parser, use of parens incorrect I think
 parse_Boolean :: PotatoParser Boolean
 parse_Boolean =
   try (PT.parens parse_Boolean_Bin) <|>
@@ -75,8 +76,18 @@ parse_Object om = do
 parse_ObjBinOp :: PotatoParser ObjBinOp
 parse_ObjBinOp = (PT.reservedOp "and" >> return And_Obj) <|> (PT.reservedOp "or" >> return Or_Obj)
 
+parse_AbsOrRel :: PotatoParser (a -> AbsOrRel a)
+parse_AbsOrRel = try (PT.symbol "Abs" >> return Abs) <|> try (PT.symbol "Rel" >> return Rel) <|> return Abs
+
 parse_Orientation :: PotatoParser Orientation
 parse_Orientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys orientations))
+
+parse_ROrientation :: PotatoParser ROrientation
+parse_ROrientation = do
+  absorrel <- parse_AbsOrRel
+  let parseOrientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys orientations))
+  name <- try (PT.parens parseOrientation) <|> parseOrientation
+  return $ absorrel name
 
 parse_Velocity :: VelocityMap -> PotatoParser Velocity
 parse_Velocity vm = do
@@ -84,9 +95,18 @@ parse_Velocity vm = do
   guardError (Map.member name vm) ("unknown velocity " ++ name)
   return name
 
+parse_RVelocity :: VelocityMap -> PotatoParser RVelocity
+parse_RVelocity vm = do
+  absorrel <- parse_AbsOrRel
+  let parseVel = PT.identifier <|> PT.operator
+  name <- try (PT.parens parseVel) <|> parseVel
+  guardError (Map.member name vm) ("unknown velocity " ++ name)
+  return $ absorrel name
+
+
 parse_SingleObject_Orientation :: ObjectMap -> PotatoParser SingleObject
 parse_SingleObject_Orientation om = do
-  orient <- parse_Orientation
+  orient <- parse_ROrientation
   obj <- parse_Object om
   return $ SingleObject_Orientation orient obj
 
@@ -94,6 +114,7 @@ parse_SingleObject :: ObjectMap -> PotatoParser SingleObject
 parse_SingleObject om = try (parse_Object om >>= return . SingleObject) <|> parse_SingleObject_Orientation om
 
 
+-- TODO incorrect use of parens, maybe use expression parser
 parse_ObjectExpr_Bin :: ObjectMap -> PotatoParser ObjectExpr
 parse_ObjectExpr_Bin om = do
   exp1 <- PT.parens (parse_ObjectExpr om)
@@ -143,7 +164,7 @@ parse_PatBinOp = do PT.reservedOp "|" >> return Pipe
 
 parse_PatternObject_Velocity :: LookupMaps -> PotatoParser PatternObj
 parse_PatternObject_Velocity (om,vm) = do
-  v <- parse_Velocity vm
+  v <- parse_RVelocity vm
   obj <- parse_SingleObject om
   return $ PatternObject_Velocity v obj
 

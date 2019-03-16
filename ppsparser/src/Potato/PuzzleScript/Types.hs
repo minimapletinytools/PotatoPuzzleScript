@@ -8,9 +8,12 @@ module Potato.PuzzleScript.Types (
   LevelSlice,
   Level(..),
 
+  AbsOrRel(..),
   Object,
   Orientation,
   Velocity,
+  ROrientation,
+  RVelocity,
   Command,
   Color,
   LegendKey,
@@ -61,15 +64,25 @@ data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITION
 headerStrings :: [String]
 headerStrings = ["OBJECTS", "LEGEND", "SOUNDS", "COLLISIONLAYERS", "RULES", "WINCONDITIONS", "LEVELS"]
 
+data AbsOrRel a = Abs a | Rel a deriving (Functor, Show)
+
 type Object = String
 -- TODO make Object var for "..."
 type Orientation = String
 type Velocity = String
+
+type ROrientation = AbsOrRel Orientation
+type RVelocity = AbsOrRel Velocity
+
 type Command = String
 type Color = String
 
-type VelocityMap = Map.Map Velocity TR
+
+-- TODO these two need to store AbsOrRel type info
 type OrientationMap = Map.Map Orientation Rotation
+type VelocityMap = Map.Map Velocity TR
+knownVelocities :: VelocityMap
+knownVelocities = Map.fromList [("v", emptyTR),("^", emptyTR),(">", emptyTR),("<", emptyTR)]
 
 -- TODO finish
 orientations :: OrientationMap
@@ -84,8 +97,7 @@ type LevelSlice = U.Vector Char
 data Level = Level Size [LevelSlice] String deriving(Show)
 
 
-knownVelocities :: VelocityMap
-knownVelocities = Map.fromList [("v", emptyTR),("^", emptyTR),(">", emptyTR),("<", emptyTR)]
+
 
 
 
@@ -95,7 +107,7 @@ data BooleanBinOp = And | Or deriving(Show)
 data Boolean = Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean deriving(Show)
 
 data ObjBinOp = And_Obj | Or_Obj deriving(Show)
-data SingleObject = SingleObject Object | SingleObject_Orientation Orientation Object deriving(Show)
+data SingleObject = SingleObject Object | SingleObject_Orientation ROrientation Object deriving(Show)
 data ObjectExpr = ObjectExpr_Single SingleObject| ObjectExpr_Bin ObjBinOp ObjectExpr ObjectExpr deriving(Show)
 
 data LegendExpr = LegendExpr Char ObjectExpr
@@ -108,7 +120,7 @@ data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond Si
 
 data PatBinOp = Pipe deriving(Show)
 -- velocity restricted to single objects for now
-data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity Velocity SingleObject deriving(Show)
+data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity RVelocity SingleObject deriving(Show)
 -- TODO may want to add more separators, not just the | that inherits scope
 type Pattern = [PatternObj]
 
