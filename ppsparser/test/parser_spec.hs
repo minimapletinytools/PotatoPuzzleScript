@@ -59,8 +59,6 @@ legendKeys :: [Char]
 legendKeys = ['a'..'z']
 newtype LegendTuples = LegendTuples [(Char,String)] deriving (Show)
 
-
-
 instance Arbitrary LegendTuples where
   arbitrary = LegendTuples <$>
     (zip <$> (listOf . elements $ legendKeys) `suchThat` hasNoDups

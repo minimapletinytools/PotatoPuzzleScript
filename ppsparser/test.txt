@@ -29,7 +29,7 @@ LEGEND
 P = Player
 * = Crate
 @ = Crate
-O = Target
+O = Target and Crate
 
 =======
 SOUNDS

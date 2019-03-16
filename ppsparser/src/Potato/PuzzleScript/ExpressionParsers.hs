@@ -22,40 +22,36 @@ import qualified Potato.PuzzleScript.Token as PT
 import Potato.PuzzleScript.ParserOutput
 
 import qualified Data.Map as Map
+import qualified Data.Text as T
+import Data.Functor.Identity (Identity)
 import Text.Parsec
+import Text.Parsec.Expr
 
 type LookupMaps = (ObjectMap, VelocityMap)
 
 guardError :: Bool -> String -> PotatoParser ()
 guardError b msg = if b then return () else fail msg
 
-parse_BooleanBinOp :: PotatoParser BooleanBinOp
-parse_BooleanBinOp =
-  try (PT.reservedOp "And" >> return And) <|>
-  try (PT.reservedOp "Or" >> return Or) <?>
-  "valid Boolean binary operator"
+maybeParens :: PotatoParser a -> PotatoParser a
+maybeParens p = PT.parens p <|> p
 
-parse_Boolean_Not :: PotatoParser Boolean
-parse_Boolean_Not = do
-  PT.reservedOp "Not"
-  b <- parse_Boolean
-  return $ Boolean_Not b
+opTable_Boolean :: [[Operator T.Text Output Identity Boolean]]
+opTable_Boolean =
+  [[Prefix (PT.reservedOp "not" >> return (Boolean_Not))],
+  [Infix (PT.reservedOp "and" >> return (Boolean_Bin And)) AssocLeft],
+  [Infix (PT.reservedOp "or" >> return (Boolean_Bin Or)) AssocLeft]]
 
-parse_Boolean_Bin :: PotatoParser Boolean
-parse_Boolean_Bin = do
-  b1 <- parse_Boolean
-  op <- parse_BooleanBinOp
-  b2 <- parse_Boolean
-  return $ Boolean_Bin op b1 b2
-
--- TODO switch to expression parser, use of parens incorrect I think
-parse_Boolean :: PotatoParser Boolean
-parse_Boolean =
-  try (PT.parens parse_Boolean_Bin) <|>
-  try (PT.parens parse_Boolean_Not) <|>
-  try (PT.reserved "True" >> return Boolean_True) <|>
-  try (PT.reserved "False" >> return Boolean_False) <?>
+-- TODO consider allowing patterns here?
+parse_Boolean_Term :: PotatoParser Boolean
+parse_Boolean_Term =
+  PT.parens parse_Boolean <|>
+  (PT.reserved "True" >> return Boolean_True) <|>
+  (PT.reserved "False" >> return Boolean_False) <?>
   "valid Boolean expression"
+
+parse_Boolean :: PotatoParser Boolean
+parse_Boolean = buildExpressionParser opTable_Boolean parse_Boolean_Term <?> "Boolean"
+
 
 parse_Command :: PotatoParser Command
 parse_Command = do
@@ -73,9 +69,6 @@ parse_Object om = do
   guardError (Map.member name om) ("unknown object " ++ name)
   return name
 
-parse_ObjBinOp :: PotatoParser ObjBinOp
-parse_ObjBinOp = (PT.reservedOp "and" >> return And_Obj) <|> (PT.reservedOp "or" >> return Or_Obj)
-
 parse_AbsOrRel :: PotatoParser (a -> AbsOrRel a)
 parse_AbsOrRel = try (PT.symbol "Abs" >> return Abs) <|> try (PT.symbol "Rel" >> return Rel) <|> return Abs
 
@@ -86,7 +79,7 @@ parse_ROrientation :: PotatoParser ROrientation
 parse_ROrientation = do
   absorrel <- parse_AbsOrRel
   let parseOrientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys orientations))
-  name <- try (PT.parens parseOrientation) <|> parseOrientation
+  name <- maybeParens parseOrientation
   return $ absorrel name
 
 parse_Velocity :: VelocityMap -> PotatoParser Velocity
@@ -99,7 +92,7 @@ parse_RVelocity :: VelocityMap -> PotatoParser RVelocity
 parse_RVelocity vm = do
   absorrel <- parse_AbsOrRel
   let parseVel = PT.identifier <|> PT.operator
-  name <- try (PT.parens parseVel) <|> parseVel
+  name <- maybeParens parseVel
   guardError (Map.member name vm) ("unknown velocity " ++ name)
   return $ absorrel name
 
@@ -113,18 +106,16 @@ parse_SingleObject_Orientation om = do
 parse_SingleObject :: ObjectMap -> PotatoParser SingleObject
 parse_SingleObject om = try (parse_Object om >>= return . SingleObject) <|> parse_SingleObject_Orientation om
 
+opTable_ObjectExpr :: [[Operator T.Text Output Identity ObjectExpr]]
+opTable_ObjectExpr =
+  [[Infix (PT.reservedOp "and" >> return (ObjectExpr_Bin And_Obj)) AssocLeft],
+  [Infix (PT.reservedOp "or" >> return (ObjectExpr_Bin Or_Obj)) AssocLeft]]
 
--- TODO incorrect use of parens, maybe use expression parser
-parse_ObjectExpr_Bin :: ObjectMap -> PotatoParser ObjectExpr
-parse_ObjectExpr_Bin om = do
-  exp1 <- PT.parens (parse_ObjectExpr om)
-  op <- parse_ObjBinOp
-  exp2 <- PT.parens (parse_ObjectExpr om)
-  return $ ObjectExpr_Bin op exp1 exp2
-
+parse_ObjectExpr_Term :: ObjectMap -> PotatoParser ObjectExpr
+parse_ObjectExpr_Term om = PT.parens (parse_ObjectExpr om) <|> (parse_SingleObject om >>= return . ObjectExpr_Single)
 
 parse_ObjectExpr :: ObjectMap -> PotatoParser ObjectExpr
-parse_ObjectExpr om = try (parse_SingleObject om >>= return . ObjectExpr_Single) <|> parse_ObjectExpr_Bin om
+parse_ObjectExpr om = buildExpressionParser opTable_ObjectExpr (parse_ObjectExpr_Term om) <?> "ObjectExpr"
 
 parse_LegendExpr :: ObjectMap -> PotatoParser LegendExpr
 parse_LegendExpr om = do
@@ -159,6 +150,10 @@ parse_WinCondBinOp om = do
 parse_WinCond :: ObjectMap -> PotatoParser WinCond
 parse_WinCond om = try (parse_WinCondBinOp om) <|> (parse_BasicWinCond om >>= return . WinCond_Basic)
 
+
+
+
+
 parse_PatBinOp :: PotatoParser PatBinOp
 parse_PatBinOp = do PT.reservedOp "|" >> return Pipe
 
@@ -176,6 +171,8 @@ parse_PatternObj lm@(om,_) =
 
 parse_Pattern :: LookupMaps -> PotatoParser Pattern
 parse_Pattern lm = PT.brackets $ sepBy (parse_PatternObj lm) parse_PatBinOp
+
+
 
 parse_RuleBinOp :: PotatoParser RuleBinOp
 parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
@@ -215,6 +212,11 @@ parse_Rule_Scoped lm@(_,vm) = do
   v <- parse_Velocity vm
   r <- parse_UnscopedRule lm
   return $ Rule_Scoped v r
+
+-- do we support multi nested loops?
+--parse_Rule_Looped :: LookupMaps -> PotatoParser Rule
+--parse_Rule_Looped lm = do
+--  rules <- between (PT.reserved "startLoop") (PT.reserved "endLoop") parse_Rule
 
 parse_Rule :: LookupMaps -> PotatoParser Rule
 parse_Rule lm =
