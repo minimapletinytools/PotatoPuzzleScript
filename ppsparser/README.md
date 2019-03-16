@@ -48,43 +48,24 @@ TURN_MINUSZ: (-π/2,0,0)
 
 
 
+pattern matching rules:
+
+{scope} [{vel} {rot} object {| ...}] -> [{vel} {rot} object {| ...}]
+
+if scope is nil, then translation component of first bound velocity is used
+if scope is SCOPE_PATTERN, then all directions matching SCOPE_PATTERN are tried for scope (i.e. duplicate rules for each scope matching SCOPE_PATTERN)
+
+if {vel} is abs(x) then match object with velocity x and bind velocity to x
+if {vel} is rel(x) then match object with velocity scope * x
+if {vel} is nil then match object with velocity 0
+
+if {rot} is abs(x) then match object with rotation x
+if {rot} is rel(x) then match object with rotation rot(scope) * rot
+if {rot} is nil, then match object with any rotation
+
+| operator is relative to scope, i.e. A|B means B is matched with trans(A)*scope
 
 
-regular velocties
-
-[V P A | B] -> [V P A | abs_V B]
-
-no scope
-  match A with rot(A) = P && vel(A) = V
-    scope V (because no scope, matches PS behavior)
-      match B with
-
-DIR [A | P B] -> [A | > B]
-scope DIR
-  match A
-    match B with pos(B) = pos(A) + scope*1 && rot(B) = P
-      set vel B = scope
-
-
-relative velocities
-rel(V) only supported for >^<v, these are matched relative to the scope direction
-
-[rel(V) P A | B] -> [rel(V) P A | rel(V) B]
-
-no global
-  scope rel_V (vel of matched A)
-    match A with rot(A) = P && vel(A) = V
-      match B with pos(B) = pos(A) + scope*1
-        set vel(B) = scope
-
-
-
-
-
-
-engine state
-[levelstate]
-level state
 
 
 
