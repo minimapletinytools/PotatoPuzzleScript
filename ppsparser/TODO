@@ -1,4 +1,4 @@
--add plus operator to rule expr
--add rigid and loop parsing
+-add plus operator to rule expr (parse_RuleGroup)
+-add rigid and start/end parsing to rules
 -double check there are trys to all token parsers inside of <|> where needed
--fix parens issue, use expression parser or build your own
+DONE-fix parens issue, use expression parser or build your own

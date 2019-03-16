@@ -106,6 +106,7 @@ parse_SingleObject_Orientation om = do
 parse_SingleObject :: ObjectMap -> PotatoParser SingleObject
 parse_SingleObject om = try (parse_Object om >>= return . SingleObject) <|> parse_SingleObject_Orientation om
 
+
 opTable_ObjectExpr :: [[Operator T.Text Output Identity ObjectExpr]]
 opTable_ObjectExpr =
   [[Infix (PT.reservedOp "and" >> return (ObjectExpr_Bin And_Obj)) AssocLeft],
@@ -116,6 +117,8 @@ parse_ObjectExpr_Term om = PT.parens (parse_ObjectExpr om) <|> (parse_SingleObje
 
 parse_ObjectExpr :: ObjectMap -> PotatoParser ObjectExpr
 parse_ObjectExpr om = buildExpressionParser opTable_ObjectExpr (parse_ObjectExpr_Term om) <?> "ObjectExpr"
+
+
 
 parse_LegendExpr :: ObjectMap -> PotatoParser LegendExpr
 parse_LegendExpr om = do
@@ -149,10 +152,6 @@ parse_WinCondBinOp om = do
 
 parse_WinCond :: ObjectMap -> PotatoParser WinCond
 parse_WinCond om = try (parse_WinCondBinOp om) <|> (parse_BasicWinCond om >>= return . WinCond_Basic)
-
-
-
-
 
 parse_PatBinOp :: PotatoParser PatBinOp
 parse_PatBinOp = do PT.reservedOp "|" >> return Pipe

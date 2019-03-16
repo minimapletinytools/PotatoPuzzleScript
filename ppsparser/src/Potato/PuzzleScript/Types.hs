@@ -127,6 +127,7 @@ type Pattern = [PatternObj]
 data RuleBinOp = Arrow deriving(Show)
 data UnscopedRule = UnscopedRule_Pattern Pattern Pattern | UnscopedRule_Rule Pattern Rule | UnscopedRuleBoolean Boolean Rule deriving(Show)
 data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Show)
+-- TODO RuleGroup [Rule]
 
 
 
