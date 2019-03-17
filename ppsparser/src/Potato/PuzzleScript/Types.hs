@@ -92,8 +92,9 @@ type LegendKey = Char
 type LegendMap = Map.Map LegendKey ObjectExpr
 
 
-type Size = (Int, Int)
+type Size = (Int, Int, Int)
 type LevelSlice = U.Vector Char
+-- level is from bottom to top
 data Level = Level Size [LevelSlice] String deriving(Show)
 
 

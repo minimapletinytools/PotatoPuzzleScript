@@ -132,7 +132,7 @@ parseWinConditions = do
 tryFirstThen :: Stream s m t => ParsecT s u m a -> ParsecT s u m b -> ParsecT s u m b
 tryFirstThen a b = try (a >> b) <|> b
 
-parseLevelSlice :: PotatoParser (Size, LevelSlice)
+parseLevelSlice :: PotatoParser ((Int,Int), LevelSlice)
 parseLevelSlice = do
   state <- getState
   let
@@ -148,12 +148,14 @@ parseLevelSlice = do
   if all (\x' -> length x' == x) slices then return () else fail "all lines in level must have same length"
   return ((x, length slices), U.fromList (concat slices))
 
+setDepth :: Int -> (Int, Int) -> Size
+setDepth z (x,y) = (x,y,z)
 
 parseLevel :: PotatoParser Level
 parseLevel = do
   name <- tryParseLevelMessage
   slice <- parseLevelSlice
-  return $ Level  (fst slice) [snd slice] name
+  return $ Level  (setDepth 1 (fst slice)) [snd slice] name
 
 -- we don't use token here because we want don't want it to skip eol in case there is nothing after MESSAGE
 tryParseLevelMessage :: PotatoParser String
@@ -163,11 +165,11 @@ parseMultiLevel :: PotatoParser Level
 parseMultiLevel = do
   name <- tryParseLevelMessage
   PT.symbol "DEPTH"
-  x <- PT.natural
+  x <- PT.natural >>= return . fromIntegral
   if x > 0 then return () else fail "expected >0 DEPTH"
   slices <- forM [1..x] (const parseLevelSlice)
   -- TODO check that all sizes are the same, why is this so annoying
-  return $ Level (fst (slices !! 0)) (map snd slices) name
+  return $ Level (setDepth x (fst (slices !! 0))) (map snd slices) name
 
 
 
