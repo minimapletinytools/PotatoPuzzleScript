@@ -44,7 +44,7 @@ data TR = TR
   } deriving (Show, Generic, NFData)
 
 emptyTR :: TR
-emptyTR = TR (V3 0 0 0) (V3 (V3 0 0 0) (V3 0 0 0) (V3 0 0 0))
+emptyTR = TR (V3 0 0 0) (V3 (V3 1 0 0) (V3 0 1 0) (V3 0 0 1))
 
 makeLenses ''TR
 

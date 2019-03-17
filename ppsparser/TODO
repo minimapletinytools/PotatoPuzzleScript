@@ -1,4 +1,25 @@
 -add plus operator to rule expr (parse_RuleGroup)
--add rigid and start/end parsing to rules
+-add late rule support
+-add commands
+  -late?
+    -need to understand this better
+  -cancel
+  -win
+  -message
+  -again?
+  -restart?
+  -checkpoint?
+-add input conditionals
+
+-prelude
+  -use_puzzle_script_player
+    -assumes Player object and adds standard controls
+  -use_relative_player
+    -sausage roll movement
+  -require_player_movement
+
+
 -double check there are trys to all token parsers inside of <|> where needed
 DONE-fix parens issue, use expression parser or build your own
+
+-add rigid and start/endLoop parsing to rules

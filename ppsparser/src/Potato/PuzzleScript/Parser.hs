@@ -111,9 +111,9 @@ parseCollisionLayers = do
 parseRules :: PotatoParser ()
 parseRules = do
   objects <- getState >>= return . _objectList
-  rules <- manyTillHeaderOrEoF $ parse_Rule (objects, knownVelocities)
+  r <- manyTillHeaderOrEoF $ parse_Rule (objects, knownVelocities)
   --manyTillHeaderOrEoF parseLine
-  --modifyState (over rules (Map.insert key value))
+  modifyState (set rules r)
   return ()
 
 parseWinConditions :: PotatoParser ()

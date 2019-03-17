@@ -25,7 +25,7 @@ data Output = Output {
     _legend :: LegendMap,
     _collisionLayers :: [[Object]],
     --list of loops of groups of rules
-    _rules :: [[[Rule]]],
+    _rules :: [Rule],
     _winConditions :: [WinCond],
     _levels :: [Level]
 }
@@ -40,6 +40,7 @@ instance Show Output where
     "objectList: " ++ (show $ _objectList o) ++ "\n" ++
     "legend: " ++ (show $ _legend o) ++ "\n" ++
     "collisionLayers: " ++ (show $ _collisionLayers o) ++ "\n" ++
+    "rules: " ++ (show $ _rules o) ++ "\n" ++
     "winConditions: " ++ (show $ _winConditions o) ++ "\n" ++
     "levels: " ++ (show $ _levels o)
 

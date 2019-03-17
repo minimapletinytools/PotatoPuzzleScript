@@ -55,6 +55,9 @@ dependencies:
 - linear
 - deepseq
 - vector
+- vty
+- ilist
+- split
 
 library:
   source-dirs: src
