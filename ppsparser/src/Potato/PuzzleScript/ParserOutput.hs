@@ -4,6 +4,7 @@ module Potato.PuzzleScript.ParserOutput (
   Output(..),
   title, author, homepage, headers, objectList, legend, collisionLayers, rules, winConditions, levels,
   emptyOutput,
+  findBackgroundKey,
   PotatoParser
 ) where
 
@@ -60,5 +61,14 @@ emptyOutput = Output {
     _winConditions = [],
     _levels = []
   }
+
+findBackgroundKey :: LegendMap -> Char
+findBackgroundKey lm = r where
+  mapfn v = case v of
+    ObjectExpr_Single (SingleObject "Background") -> Just ()
+    _ -> Nothing
+  r = case Map.keys (Map.mapMaybe mapfn lm) of
+    [] -> '.'
+    x:_ -> x
 
 type PotatoParser = Parsec T.Text Output
