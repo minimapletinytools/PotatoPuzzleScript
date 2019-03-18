@@ -141,7 +141,7 @@ parseLevelSlice = do
       r <- many1 (oneOf (Map.keys legend))
       many (oneOf " \t") >> endOfLine
       return r
-  slices <- manyTill parseLevelLine (try (void endOfLine) <|> lookAhead eof)
+  slices <- manyTill parseLevelLine (try (void endOfLine) <|> lookAhead eof) >>= return . reverse
   PT.whiteSpace
   if length slices > 0 then return () else fail "level must only use symbols defined in legend"
   let x = length (head slices)
