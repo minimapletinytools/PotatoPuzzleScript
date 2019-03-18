@@ -1,4 +1,3 @@
-module Main where
 
 import Potato.PuzzleScript
 import qualified Data.Text.IO as T

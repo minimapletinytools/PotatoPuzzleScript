@@ -1,7 +1,8 @@
 module Potato.PuzzleScript.Engine (
   Point,
   Entry,
-  LevelState
+  LevelState,
+  initLevelState
 ) where
 
 import Potato.Math.Integral.TR
@@ -32,8 +33,9 @@ objectExprToEntry _ = error "or not allowed"
 
 initLevelState :: LegendMap -> Level -> LevelState
 initLevelState lm (Level (x,_,_) entries _) = L.ifoldl outfoldfn Map.empty entries where
+  bg = findBackgroundKey lm
   infoldfn :: Int -> LevelState -> Int -> Char -> LevelState
-  infoldfn z m i e = Map.insert (i `mod` x, i `div` x, z) (objectExprToEntry (lm Map.! e)) m
+  infoldfn z m i e = if e == bg then m else Map.insert (i `mod` x, i `div` x, z) (objectExprToEntry (lm Map.! e)) m
   outfoldfn :: LevelState -> Int -> LevelSlice -> LevelState
   outfoldfn m i e = U.ifoldl (infoldfn i) m e
 

@@ -22,6 +22,7 @@ data Output = Output {
     _homepage :: String,
     _headers :: [Header],
     _velocityList :: VelocityMap,
+    -- TODO rename to objectMap
     _objectList :: ObjectMap,
     _legend :: LegendMap,
     _collisionLayers :: [[Object]],

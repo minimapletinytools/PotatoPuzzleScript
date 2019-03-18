@@ -1,5 +1,5 @@
 module Potato.PuzzleScript.Vty (
-
+  renderLevel
 ) where
 
 import qualified Data.Map as Map
@@ -11,8 +11,8 @@ import Potato.PuzzleScript.Engine
 
 import Lens.Micro.Platform
 
-render :: ObjectMap -> Point -> LevelState -> Picture
-render om size@(sx,sy,sz) level = picForLayers final where
+renderLevel :: ObjectMap -> Point -> LevelState -> Picture
+renderLevel om size@(sx,sy,sz) level = picForLayers final where
   foldxfn :: (Int, Int, Int) -> String -> String
   foldxfn pt rowstr = entry:rowstr where
      entry = case Map.lookup pt level of
@@ -31,7 +31,7 @@ render om size@(sx,sy,sz) level = picForLayers final where
     splitRow = split (onSublist " ") row
     foldtoimage img str = case str of
       " " -> translateX 1 img
-      x -> img <|> string defAttr x
+      x -> string defAttr x <|> img
 
   imagerowstoimage :: [Image] -> Image
   imagerowstoimage imgs = ifoldl foldfn emptyImage imgs where
