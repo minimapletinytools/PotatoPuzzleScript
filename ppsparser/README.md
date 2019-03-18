@@ -1,5 +1,9 @@
-coordinates or as follows
+# 🥔🧩📜
 
+### Coordinate System
+
+coordinates or as follows
+```
         +z
         ^   +y
         |  ^
@@ -10,8 +14,13 @@ coordinates or as follows
       /
      /
     v
-
+```
+It is only possible to use the +x +y +z octant
 If looking at just x y plane where z = 0, then should be equivalent to Puzzle Script
+
+
+
+### Rotations and Velocities WIP
 
 base orientation is looking down +Y axis with up in the +Z axis
 
@@ -48,7 +57,7 @@ TURN_MINUSZ: (-π/2,0,0)
 
 
 
-pattern matching rules:
+### Pattern Matching
 
 {scope} [{vel} {rot} object {| ...}] -> [{vel} {rot} object {| ...}]
 
@@ -64,34 +73,3 @@ if {rot} is rel(x) then match object with rotation rot(scope) * rot
 if {rot} is nil, then match object with any rotation
 
 | operator is relative to scope, i.e. A|B means B is matched with trans(A)*scope
-
-
-
-
-
-
-
-
--- | TODO Matrix var support
---type Matrix = String
-
--- | ObjMod represents an object modifier token
--- there are two distinct types of ObjMod VelMod and RotMod
--- RotMod represents orientation of an object
--- VelMod represents velocity of a moving object
--- then there are two distinct categories of ObjMod Static and Contextual
--- contextual mods match several patterns and create a context object that is used later on in the pattern matching
--- (note a static mod is just a contextual mod that uses itself as the context)
---type ObjMod = String
---type VelMod = String
---type RotMod = String
-
--- context is hierarchical
-  -- [up obj1 |> down obj2 |> right obj3] -> [any obj1 |> any obj2 |> any obj3]
-    -- RHS anys gets replaced with up down right in that order
-  -- [up obj1 |> (any obj2 |^ relforward obj3) |> relforward obj4 ] -> [any obj1 |> any obj2 |> any obj3 |> any obj3]
-    -- relforward obj3 is matched with <rotation of obj2> obj3
-    -- relforward obj4 is matched with up obj4 and is next to obj2 <-- this is a little weird but makes it easier to express some patterns than if we chose obj3 here
---RotMods
---ignore, matched with all rots on LHS, can only be replaced with ignore or static mods on RHS
---any, matched with all rots on LHS, sets current rot as context
