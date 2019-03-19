@@ -79,10 +79,12 @@ type Color = String
 
 
 -- TODO these two need to store AbsOrRel type info
+-- one idea is to do Map.Map Orientation (AbsOrRel Rotation)
+-- and ROrientation Abs/Rel overrides Rotation Abs/Rel when used
 type OrientationMap = Map.Map Orientation Rotation
 type VelocityMap = Map.Map Velocity TR
 knownVelocities :: VelocityMap
-knownVelocities = Map.fromList [("v", emptyTR),("^", emptyTR),(">", emptyTR),("<", emptyTR)]
+knownVelocities = Map.fromList [("v", identity),("^", identity),(">", identity),("<", identity)]
 
 -- TODO finish
 orientations :: OrientationMap

@@ -51,7 +51,7 @@ data ExecutionCtx = ExecutionCtx {
 
 emptyExecutionCtx :: ExecutionCtx
 emptyExecutionCtx = ExecutionCtx {
-    _scope = emptyTR,
+    _scope = identity,
     _remainingRules = []
 }
 
