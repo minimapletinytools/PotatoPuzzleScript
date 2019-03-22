@@ -1,11 +1,13 @@
 {-|
 Module      : TR
-Description : types represented int translations and rotations in R3
+Description : data type representing translations and rotations in R3 Int
 Copyright   : (c) Peter Lu, 2018
 License     : GPL-3
 Maintainer  : chippermonky@email.com
 Stability   : experimental
 
+
+-- TODO replace Int with (Integral a) => a
 -}
 
 

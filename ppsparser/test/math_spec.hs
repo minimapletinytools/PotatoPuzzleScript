@@ -11,6 +11,8 @@ import qualified Linear.Matrix as M
 
 import Test.QuickCheck
 
+import Debug.Trace
+
 prop_TODO :: Bool
 prop_TODO = True
 
@@ -30,16 +32,42 @@ instance (Bounded a, Integral a) => Arbitrary (M.M33 a) where
     v3 <- arbitrary
     return (V3 v1 v2 v3)
 
+e :: Integral a => M.M33 a
+e =   V3 (V3 1 0 0)
+         (V3 0 1 0)
+         (V3 0 0 1)
+
+x :: Integral a => M.M33 a
+x =   V3 (V3 1 0 0)
+         (V3 0 0 (-1))
+         (V3 0 1 0)
+
+z :: Integral a => M.M33 a
+z =   V3 (V3 0 (-1) 0)
+         (V3 1 0 0)
+         (V3 0 0 1)
+
+y :: Integral a => M.M33 a
+y =   V3 (V3 0 0 (-1))
+         (V3 0 1 0)
+         (V3 1 0 0)
+
+newtype OrthogonalRotation a = OrthogonalRotation (M.M33 a)
+instance (Integral a) => Arbitrary (OrthogonalRotation a) where
+  arbitrary :: Gen (OrthogonalRotation a)
+  arbitrary = do
+    rotlist <- listOf $ elements [x,y,z,e]
+    return $ OrthogonalRotation (foldl (M.!*!) e rotlist)
+
 instance Arbitrary TR where
   arbitrary :: Gen TR
   arbitrary = do
     trans <- arbitrary
-    -- TODO this is not a rotation matrix
-    rot <- arbitrary `suchThat` (\x -> M.det33 x /= 0)
+    OrthogonalRotation rot <- arbitrary
     return (TR trans rot)
 
---prop_invTR :: TR -> Bool
---prop_invTR tr = (invTR tr) !*! tr == identity
+prop_invTR :: TR -> Bool
+prop_invTR tr = (invTR tr) !*! tr == identity
 
 
 --Template haskell nonsense to run all properties prefixed with "prop_" in this file

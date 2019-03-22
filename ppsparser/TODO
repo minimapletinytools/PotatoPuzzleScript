@@ -11,6 +11,10 @@
   -checkpoint?
 -add input conditionals
 
+-potato math
+  -do rot
+  -improve TR unit tests
+
 -prelude
   -use_puzzle_script_player
     -assumes Player object and adds standard controls
