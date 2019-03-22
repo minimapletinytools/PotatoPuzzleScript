@@ -13,7 +13,7 @@
 
 -potato math
   -do rot
-  -improve TR unit tests
+  DONE-improve TR unit tests
 
 -prelude
   -use_puzzle_script_player

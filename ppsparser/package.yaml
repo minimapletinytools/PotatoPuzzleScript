@@ -58,6 +58,7 @@ dependencies:
 - vty
 - ilist
 - split
+- derive-enumerable
 
 library:
   source-dirs: src

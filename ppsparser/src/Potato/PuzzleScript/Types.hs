@@ -1,13 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Potato.PuzzleScript.Types (
   Header(..),
-  headerStrings,
 
   Size,
   LevelSlice,
   Level(..),
 
+  KeyboardInput(..),
   AbsOrRel(..),
   Object,
   Orientation,
@@ -53,16 +54,17 @@ module Potato.PuzzleScript.Types (
 
 import Potato.Math.Integral.TR
 
+import GHC.Generics
+import Data.Enumerable.Generic
 import qualified Data.Map as Map
 import Text.Parsec
 import qualified Data.Vector.Unboxed as U
 
 import Lens.Micro.Platform
 
-data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITIONS | LEVELS deriving (Read, Show)
-
-headerStrings :: [String]
-headerStrings = ["OBJECTS", "LEGEND", "SOUNDS", "COLLISIONLAYERS", "RULES", "WINCONDITIONS", "LEVELS"]
+data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITIONS | LEVELS deriving (Read, Show, Generic)
+instance Enumerable Header
+instance Default Header where def = OBJECTS
 
 data AbsOrRel a = Abs a | Rel a deriving (Functor, Show)
 
@@ -99,15 +101,12 @@ type LevelSlice = U.Vector Char
 -- level is from x y z order min to max
 data Level = Level Size [LevelSlice] String deriving(Show)
 
-
-
-
-
-
+data KeyboardInput = K_NONE | K_LEFT | K_RIGHT | K_DOWN | K_UP | K_Z | K_X deriving(Show, Read, Generic)
+instance Enumerable KeyboardInput
+instance Default KeyboardInput where def = K_NONE
 
 data BooleanBinOp = And | Or deriving(Show)
--- TODO add variables
-data Boolean = Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean deriving(Show)
+data Boolean = Boolean_Var String | Boolean_Input KeyboardInput | Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean deriving(Show)
 
 data ObjBinOp = And_Obj | Or_Obj deriving(Show)
 data SingleObject = SingleObject Object | SingleObject_Orientation ROrientation Object deriving(Show)

@@ -21,6 +21,7 @@ import Potato.PuzzleScript.Types
 import qualified Potato.PuzzleScript.Token as PT
 import Potato.PuzzleScript.ParserOutput
 
+import Data.Enumerable.Generic
 import qualified Data.Map as Map
 import qualified Data.Text as T
 import Data.Functor.Identity (Identity)
@@ -41,10 +42,16 @@ opTable_Boolean =
   [Infix (PT.reservedOp "and" >> return (Boolean_Bin And)) AssocLeft],
   [Infix (PT.reservedOp "or" >> return (Boolean_Bin Or)) AssocLeft]]
 
+parse_Boolean_Input :: PotatoParser Boolean
+parse_Boolean_Input = do
+  enum <- choice $ map (\x -> PT.reserved (show x) >> return (show x)) (allEnum :: [KeyboardInput])
+  return $ Boolean_Input (read enum)
+
 -- TODO consider allowing patterns here?
 parse_Boolean_Term :: PotatoParser Boolean
 parse_Boolean_Term =
   PT.parens parse_Boolean <|>
+  parse_Boolean_Input <|>
   (PT.reserved "True" >> return Boolean_True) <|>
   (PT.reserved "False" >> return Boolean_False) <?>
   "valid Boolean expression"
