@@ -24,7 +24,6 @@ import Potato.PuzzleScript.Types
 import Potato.PuzzleScript.ParserOutput
 import Text.Parsec
 import Control.Monad.Identity
-import Data.Enumerable.Generic
 import qualified Data.Map as Map
 import qualified Data.Text as T
 import qualified Text.Parsec.Token as Token
@@ -98,7 +97,7 @@ languageDef_ =
            }
 
 languageDef = languageDef_ {
-  Token.reservedNames = Token.reservedNames languageDef_ ++ map show (allEnum :: [KeyboardInput])
+  Token.reservedNames = Token.reservedNames languageDef_ ++ map show allKeyboardInputs
 }
 
 lexer = Token.makeTokenParser languageDef

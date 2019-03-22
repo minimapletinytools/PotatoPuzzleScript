@@ -10,6 +10,8 @@
   -restart?
   -checkpoint?
 -add input conditionals
+  -engine interface
+  -vty hookups
 
 -potato math
   -do rot

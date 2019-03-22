@@ -12,7 +12,6 @@ module Potato.PuzzleScript.Parser(
 
 ) where
 
-import Data.Enumerable.Generic
 import Potato.PuzzleScript.Types
 import Potato.PuzzleScript.ParserOutput
 import Potato.PuzzleScript.ExpressionParsers
@@ -40,7 +39,7 @@ parseLine = do
 parseHeaderAny :: PotatoParser Header
 parseHeaderAny = do
   many1 (char '=') >> endOfLine
-  headerString <- (Prelude.foldl1 (<|>) $ map (try . string) (map show (allEnum :: [Header])) ) <?> "valid header"
+  headerString <- (Prelude.foldl1 (<|>) $ map (try . string) (map show allHeaders)) <?> "valid header"
   endOfLine
   many1 (char '=') >> endOfLine
   return $ read headerString

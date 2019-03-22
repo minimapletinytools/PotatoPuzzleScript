@@ -5,6 +5,36 @@ import qualified Data.Text.IO as T
 import Text.Parsec
 import Graphics.Vty
 
+vtyKeyToKeyboardInput :: Key -> KeyboardInput
+vtyKeyToKeyboardInput k = case k of
+  KChar 'x' -> K_X
+  KChar 'z' -> K_Z
+  KLeft -> K_LEFT
+  KRight -> K_RIGHT
+  KUp -> K_UP
+  KDown -> K_DOWN
+
+loop :: Vty -> Point -> ObjectMap -> LevelState -> IO ()
+loop vty sz om ls = do
+  let
+    pic = renderLevel om sz ls
+    wait = do
+      e <- nextEvent vty
+      case e of
+        EvKey k_ _ -> case k_ of
+          KEsc -> shutdown vty
+          k -> do
+            let
+              keys = vtyKeyToKeyboardInput k
+            -- TODO update ls
+            loop vty sz om ls
+        _ -> wait
+  update vty pic
+  wait
+
+
+
+
 main :: IO ()
 main = do
   text1 <- T.readFile "test.txt"
@@ -16,7 +46,4 @@ main = do
     lm = _legend output
     om = _objectList output
     levelState = initLevelState lm level
-    pic = renderLevel om sz levelState
-  update vty pic
-  e <- nextEvent vty
-  shutdown vty
+  loop vty sz om levelState

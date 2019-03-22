@@ -10,6 +10,7 @@ import Potato.PuzzleScript.Types
 import Potato.PuzzleScript.ParserOutput
 import qualified Data.List.Index as L
 import qualified Data.Vector.Unboxed as U
+import qualified Data.Set as Set
 import qualified Data.Map as Map
 
 import Lens.Micro.Platform
@@ -55,5 +56,5 @@ emptyExecutionCtx = ExecutionCtx {
     _remainingRules = []
 }
 
-execLevel :: Rules -> LevelState -> LevelState
+execLevel :: Set.Set KeyboardInput -> Rules -> LevelState -> LevelState
 execLevel r l = undefined

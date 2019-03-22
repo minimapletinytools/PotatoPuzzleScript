@@ -1,14 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DeriveGeneric #-}
 
 module Potato.PuzzleScript.Types (
   Header(..),
+  allHeaders,
 
   Size,
   LevelSlice,
   Level(..),
 
   KeyboardInput(..),
+  allKeyboardInputs,
   AbsOrRel(..),
   Object,
   Orientation,
@@ -54,17 +55,15 @@ module Potato.PuzzleScript.Types (
 
 import Potato.Math.Integral.TR
 
-import GHC.Generics
-import Data.Enumerable.Generic
 import qualified Data.Map as Map
 import Text.Parsec
 import qualified Data.Vector.Unboxed as U
 
 import Lens.Micro.Platform
 
-data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITIONS | LEVELS deriving (Read, Show, Generic)
-instance Enumerable Header
-instance Default Header where def = OBJECTS
+data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITIONS | LEVELS deriving (Read, Show, Enum)
+allHeaders :: [Header]
+allHeaders = enumFrom OBJECTS
 
 data AbsOrRel a = Abs a | Rel a deriving (Functor, Show)
 
@@ -101,9 +100,9 @@ type LevelSlice = U.Vector Char
 -- level is from x y z order min to max
 data Level = Level Size [LevelSlice] String deriving(Show)
 
-data KeyboardInput = K_NONE | K_LEFT | K_RIGHT | K_DOWN | K_UP | K_Z | K_X deriving(Show, Read, Generic)
-instance Enumerable KeyboardInput
-instance Default KeyboardInput where def = K_NONE
+data KeyboardInput = K_NONE | K_LEFT | K_RIGHT | K_DOWN | K_UP | K_Z | K_X deriving(Show, Read, Enum)
+allKeyboardInputs :: [KeyboardInput]
+allKeyboardInputs = enumFrom K_LEFT
 
 data BooleanBinOp = And | Or deriving(Show)
 data Boolean = Boolean_Var String | Boolean_Input KeyboardInput | Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean deriving(Show)
