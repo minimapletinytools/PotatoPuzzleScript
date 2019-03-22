@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE OverlappingInstances #-}
+--{-# LANGUAGE OverlappingInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 
@@ -13,9 +13,6 @@ import Test.QuickCheck
 
 import Debug.Trace
 
-prop_TODO :: Bool
-prop_TODO = True
-
 instance (Bounded a, Integral a) => Arbitrary (V3 a) where
   arbitrary :: Gen (V3 a)
   arbitrary = do
@@ -23,7 +20,7 @@ instance (Bounded a, Integral a) => Arbitrary (V3 a) where
     y <- arbitrarySizedIntegral
     z <- arbitrarySizedIntegral
     return (V3 x y z)
-
+{-
 instance (Bounded a, Integral a) => Arbitrary (M.M33 a) where
   arbitrary :: Gen (M.M33 a)
   arbitrary = do
@@ -31,24 +28,24 @@ instance (Bounded a, Integral a) => Arbitrary (M.M33 a) where
     v2 <- arbitrary
     v3 <- arbitrary
     return (V3 v1 v2 v3)
-
-e :: Integral a => M.M33 a
-e =   V3 (V3 1 0 0)
+-}
+er :: Integral a => M.M33 a
+er =   V3 (V3 1 0 0)
          (V3 0 1 0)
          (V3 0 0 1)
 
-x :: Integral a => M.M33 a
-x =   V3 (V3 1 0 0)
+xr :: Integral a => M.M33 a
+xr =   V3 (V3 1 0 0)
          (V3 0 0 (-1))
          (V3 0 1 0)
 
-z :: Integral a => M.M33 a
-z =   V3 (V3 0 (-1) 0)
+zr :: Integral a => M.M33 a
+zr =   V3 (V3 0 (-1) 0)
          (V3 1 0 0)
          (V3 0 0 1)
 
-y :: Integral a => M.M33 a
-y =   V3 (V3 0 0 (-1))
+yr :: Integral a => M.M33 a
+yr =   V3 (V3 0 0 (-1))
          (V3 0 1 0)
          (V3 1 0 0)
 
@@ -56,8 +53,8 @@ newtype OrthogonalRotation a = OrthogonalRotation (M.M33 a)
 instance (Integral a) => Arbitrary (OrthogonalRotation a) where
   arbitrary :: Gen (OrthogonalRotation a)
   arbitrary = do
-    rotlist <- listOf $ elements [x,y,z,e]
-    return $ OrthogonalRotation (foldl (M.!*!) e rotlist)
+    rotlist <- listOf $ elements [xr,yr,zr,er]
+    return $ OrthogonalRotation (foldl (M.!*!) er rotlist)
 
 instance Arbitrary TR where
   arbitrary :: Gen TR
