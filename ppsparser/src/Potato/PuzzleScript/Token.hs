@@ -24,6 +24,7 @@ import Potato.PuzzleScript.Types
 import Potato.PuzzleScript.ParserOutput
 import Text.Parsec
 import Control.Monad.Identity
+import Data.Enumerable.Generic
 import qualified Data.Map as Map
 import qualified Data.Text as T
 import qualified Text.Parsec.Token as Token
@@ -46,7 +47,7 @@ emptyDef = Token.LanguageDef
            }
 
 
-languageDef =
+languageDef_ =
   emptyDef { Token.commentStart    = "/*"
            , Token.commentEnd      = "*/"
            , Token.commentLine     = "//"
@@ -95,6 +96,10 @@ languageDef =
            -- note that operators are always case sensitive
            --, Token.caseSensitive   = False
            }
+
+languageDef = languageDef_ {
+  Token.reservedNames = Token.reservedNames languageDef_ ++ map show (allEnum :: [KeyboardInput])
+}
 
 lexer = Token.makeTokenParser languageDef
 
