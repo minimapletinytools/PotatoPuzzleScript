@@ -13,14 +13,22 @@ It's called 🥔PuzzleScript because 🥔s are 3D.
 
 ## Current State
 
-Just started. Working on parsers.
+Parsers done for simplified rules
+Parsers property tests WIP
+Just started on interpreter
+Added Vty terminal interface for testing interpreter
 
 ## Roadmap
 
-- finish parser to generate AST
-- finish AST interpreter
-- write C bindings
-- do front end in Rust
+- finish parser to generate AST (50%)
+  - finish outstanding issues with velocity and orientation
+  - add support for + operator and start/endLoop
+  - finish commands
+  - add support for boolean arithmetic
+- finish AST interpreter (1%)
+- full featured Haskell terminal interface (10%)
+- C bindings
+- Rust front end (separate repo)
 
 ## Features (planned)
 
@@ -31,4 +39,7 @@ Just started. Working on parsers.
 
 ## Notable Changes from PuzzleScript
 
-- no collision layers, as these can be represented in 3D
+- 🥔🥔🥔🥔
+- input is handled using rules rather than as a built in primitive. Prelude commands are available for default rules that match Puzzle Script functionality
+- more generalized notion of rule groups and loops
+- no "rigid" keyword. Instead, rigid bodies are implemented using loops and a scoped cancel command (details TBD)
