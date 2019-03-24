@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Potato.PuzzleScript.Engine (
   Point,
   Entry,
@@ -12,6 +14,8 @@ import qualified Data.List.Index as L
 import qualified Data.Vector.Unboxed as U
 import qualified Data.Set as Set
 import qualified Data.Map as Map
+import Control.Monad
+import Data.Maybe
 
 import Lens.Micro.Platform
 
@@ -24,6 +28,20 @@ data GameState = GameState {
   _history :: [LevelState]
 }
 type Rules = [Rule]
+
+
+data ExecutionCtx = ExecutionCtx {
+  _scope :: TR,
+  _state :: LevelState
+}
+
+makeLenses ''ExecutionCtx
+
+emptyExecutionCtx :: ExecutionCtx
+emptyExecutionCtx = ExecutionCtx {
+    _scope = identity,
+    _state = Map.empty
+}
 
 
 objectExprToEntry :: ObjectExpr -> Entry
@@ -40,21 +58,43 @@ initLevelState lm (Level (x,_,_) entries _) = L.ifoldl outfoldfn Map.empty entri
   outfoldfn :: LevelState -> Int -> LevelSlice -> LevelState
   outfoldfn m i e = U.ifoldl (infoldfn i) m e
 
+
+-- orientation of found pattern is always relative to FORWARD so only a position is provided
+findPatternObj :: ExecutionCtx -> PatternObj -> Maybe Translation
+findPatternObj ctx pattern = undefined
+
+findPattern :: ExecutionCtx -> Pattern -> Maybe [Translation]
+findPattern ctx pattern = forM pattern (findPatternObj ctx)
+
+applyRule_PatternOnce :: UnscopedRule -> ExecutionCtx -> (ExecutionCtx, Bool)
+applyRule_PatternOnce (UnscopedRule_Pattern lhs rhs) ctx = undefined
+
+applyUnscopedRule :: UnscopedRule -> ExecutionCtx -> ExecutionCtx
+applyUnscopedRule (UnscopedRule_Pattern lhs rhs) ctx = undefined
+applyUnscopedRule (UnscopedRule_Rule lhs rule) ctx = if isJust $ findPattern ctx lhs
+  then applyRule rule ctx
+  else ctx
+applyUnscopedRule (UnscopedRule_Boolean lhs rule) ctx = undefined
+
+velocityToScope :: Velocity -> TR
+velocityToScope v = undefined
+
+-- TODO make sure ctx scope is reset before calling this
+-- maybe better just to note have scope as part of ctx...
+applyRule :: Rule -> ExecutionCtx -> ExecutionCtx
+applyRule (Rule_Command cmd) ctx = undefined
+applyRule (Rule rule) ctx = applyUnscopedRule rule ctx
+applyRule (Rule_Scoped vel rule) ctx = applyUnscopedRule rule ctx' where
+  ctx' = set scope (velocityToScope vel) ctx
+
+
+--applyRule :: Rule -> ExecutionCtx -> LevelState -> LevelState
+--applyRule r ctx ls = iterate (\ls_ -> applyRuleOnce r ctx ) (ls, True)
+
 initGameState :: Output -> GameState
 initGameState output = undefined
 
 
-data ExecutionCtx = ExecutionCtx {
-  _scope :: TR,
-  _remainingRules :: Rules
-}
-
-
-emptyExecutionCtx :: ExecutionCtx
-emptyExecutionCtx = ExecutionCtx {
-    _scope = identity,
-    _remainingRules = []
-}
 
 execLevel :: Set.Set KeyboardInput -> Rules -> LevelState -> LevelState
 execLevel r l = undefined

@@ -105,29 +105,85 @@ allKeyboardInputs :: [KeyboardInput]
 allKeyboardInputs = enumFrom K_LEFT
 
 data BooleanBinOp = And | Or deriving(Show)
-data Boolean = Boolean_Var String | Boolean_Input KeyboardInput | Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean deriving(Show)
+data Boolean = Boolean_Var String | Boolean_Input KeyboardInput | Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean
+instance Show Boolean where
+  show (Boolean_Var s) = s
+  show (Boolean_Input input) = show input
+  show Boolean_True = "True"
+  show Boolean_False = "False"
+  show (Boolean_Not b) = "Not " ++ show b
+  show (Boolean_Bin op b1 b2) = show b1 ++ " " ++ show op ++ " " ++ show b2
 
 data ObjBinOp = And_Obj | Or_Obj deriving(Show)
-data SingleObject = SingleObject Object | SingleObject_Orientation ROrientation Object deriving(Show)
-data ObjectExpr = ObjectExpr_Single SingleObject| ObjectExpr_Bin ObjBinOp ObjectExpr ObjectExpr deriving(Show)
+data SingleObject = SingleObject Object | SingleObject_Orientation ROrientation Object
+instance Show SingleObject where
+  show (SingleObject obj) = obj
+  show (SingleObject_Orientation orient obj) = show orient ++ " " ++ obj
+
+data ObjectExpr = ObjectExpr_Single SingleObject| ObjectExpr_Bin ObjBinOp ObjectExpr ObjectExpr
+instance Show ObjectExpr where
+  show (ObjectExpr_Single obj) = show obj
+  show (ObjectExpr_Bin op exp1 exp2) = show exp1 ++ " " ++ show op ++ " " ++ show exp2
 
 data LegendExpr = LegendExpr Char ObjectExpr
+instance Show LegendExpr where
+  show (LegendExpr k v) = show k ++ " = " ++ show v
 
-data WinUnOp = Win_All | Win_Some | Win_No deriving(Show)
-data WinBinOp = Win_On deriving(Show)
-data BasicWinCond = BasicWinCond WinUnOp SingleObject deriving(Show)
+data WinUnOp = Win_All | Win_Some | Win_No
+instance Show WinUnOp where
+  show Win_All = "All"
+  show Win_Some = "Some"
+  show Win_No = "No"
+data WinBinOp = Win_On
+
+instance Show WinBinOp where
+  show Win_On = "on"
+
+data BasicWinCond = BasicWinCond WinUnOp SingleObject
+instance Show BasicWinCond where
+  show (BasicWinCond op obj) = show op ++ " " ++ show obj
+
 -- TODO rename to WinCondExpr
-data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond SingleObject deriving(Show)
+data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond SingleObject
+instance Show WinCond where
+  show (WinCond_Basic bwc) = show bwc
+  show (WinCond_Bin op bwc obj) = show bwc ++ " " ++ show op ++ " " ++ show obj
 
-data PatBinOp = Pipe deriving(Show)
+
+data PatBinOp = Pipe
+instance Show PatBinOp where
+  show Pipe = "|"
 -- velocity restricted to single objects for now
-data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity RVelocity SingleObject deriving(Show)
+data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity RVelocity SingleObject
+instance Show PatternObj where
+  show (PatternObject expr) = show expr
+  show (PatternObject_Velocity vel obj) = show vel ++ " " ++ show obj
+
 -- TODO may want to add more separators, not just the | that inherits scope
 type Pattern = [PatternObj]
 
-data RuleBinOp = Arrow deriving(Show)
-data UnscopedRule = UnscopedRule_Pattern Pattern Pattern | UnscopedRule_Rule Pattern Rule | UnscopedRuleBoolean Boolean Rule deriving(Show)
-data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Show)
+-- TODO patterns
+--type Patterns = [Pattern]
+
+indentOnce :: String -> String
+indentOnce = concat . map ("    " ++) . lines
+
+data RuleBinOp = Arrow
+instance Show RuleBinOp where
+  show Arrow = "->"
+
+data UnscopedRule = UnscopedRule_Pattern Pattern Pattern | UnscopedRule_Rule Pattern Rule | UnscopedRule_Boolean Boolean Rule
+instance Show UnscopedRule where
+  show (UnscopedRule_Pattern p1 p2) = show p1 ++ " -> " ++ show p2
+  show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)
+  show (UnscopedRule_Boolean b r) = show b ++ " -> " ++ indentOnce (show r)
+
+data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule
+instance Show Rule where
+  show (Rule_Command c) = show c
+  show (Rule r) = show r
+  show (Rule_Scoped vel r) = show vel ++ " " ++ show r
+
 -- TODO RuleGroup [Rule]
 
 

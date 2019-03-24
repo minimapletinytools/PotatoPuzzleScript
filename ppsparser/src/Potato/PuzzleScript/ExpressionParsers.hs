@@ -3,14 +3,9 @@
 module Potato.PuzzleScript.ExpressionParsers (
   parse_Object,
   parse_SingleObject,
-
-
   parse_ObjectExpr,
-
   parse_LegendExpr,
-
   parse_WinCond,
-
   parse_Rule
 
 
@@ -182,6 +177,22 @@ parse_Pattern lm = PT.brackets $ sepBy (parse_PatternObj lm) parse_PatBinOp
 parse_RuleBinOp :: PotatoParser RuleBinOp
 parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
 
+-- TODO validate same num args
+-- TODO validate elipses are in the same position
+validate_PatternObjPair :: PatternObj -> PatternObj -> Maybe String
+validate_PatternObjPair lhs rhs = Nothing
+
+-- | validate_UnscopedRule_Pattern checks if an UnscopedRule is valid
+-- returns Nothing if rule is valid
+validate_UnscopedRule_Pattern :: UnscopedRule -> Maybe String
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern [] []) = Nothing
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern _ []) = Just "Pattern count mismatch"
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern [] _) = Just "Pattern count mismatch"
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern (x:xs) (y:ys)) = case validate_PatternObjPair x y of
+  Nothing -> validate_UnscopedRule_Pattern (UnscopedRule_Pattern xs ys)
+  just -> just
+validate_UnscopedRule_Pattern _ = Just "Not a pattern match rule"
+
 parse_UnscopedRule_Pattern :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule_Pattern lm = do
   p1 <- parse_Pattern lm
@@ -197,17 +208,17 @@ parse_UnscopedRule_Rule lm = do
   return $ UnscopedRule_Rule p r
 
 
-parse_UnscopedRuleBoolean :: LookupMaps -> PotatoParser UnscopedRule
-parse_UnscopedRuleBoolean lm = do
+parse_UnscopedRule_Boolean :: LookupMaps -> PotatoParser UnscopedRule
+parse_UnscopedRule_Boolean lm = do
   p <- parse_Boolean
   parse_RuleBinOp
   r <- parse_Rule lm
-  return $ UnscopedRuleBoolean p r
+  return $ UnscopedRule_Boolean p r
 
 
 parse_UnscopedRule :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule lm =
-  try (parse_UnscopedRuleBoolean lm) <|>
+  try (parse_UnscopedRule_Boolean lm) <|>
   try (parse_UnscopedRule_Rule lm) <|>
   try (parse_UnscopedRule_Pattern lm) <?>
   "UnscopedRule"
