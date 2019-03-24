@@ -17,7 +17,9 @@ Stability   : experimental
 
 module Potato.Math.Integral.TR
   ( Translation
+  , zeroTranslation
   , Rotation
+  , zeroRotation
   , TR(..)
   , identity
   , toM44
@@ -38,10 +40,14 @@ import Linear.V4
 import Linear.Vector
 
 type Translation = V3 Int
+zeroTranslation :: Translation
+zeroTranslation = V3 0 0 0
 
 -- TODO enforce 90 degree increment rotation at the type level
 -- only 24 possibilities
 type Rotation = M.M33 Int
+zeroRotation :: Rotation
+zeroRotation = M.identity
 
 
 -- | matrix::M44 = T * R
@@ -56,7 +62,7 @@ data TR = TR
 makeLenses ''TR
 
 identity :: TR
-identity = TR (V3 0 0 0) M.identity
+identity = TR zeroTranslation zeroRotation
 
 axisX :: (Num a) => V3 a
 axisX = V3 1 0 0

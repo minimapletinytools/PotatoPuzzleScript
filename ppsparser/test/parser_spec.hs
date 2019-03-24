@@ -35,7 +35,6 @@ hasNoDups = loop Set.empty
 prop_hasNoDups :: [Int] -> Property
 prop_hasNoDups xs = hasNoDups xs === (nub xs == xs)
 
-
 -- predefined list of objects we will use in our test
 -- can we be even more awesome and generate these inside a test?
 defaultObjects :: [String]
@@ -49,8 +48,33 @@ defaultOutput = emptyOutput {
     _objectList = Map.fromList (map (,"white") defaultObjects)
   }
 
-newtype KnownObjects = KnownObjects [String] deriving (Show)
 
+instance Arbitrary ROrientation where
+  arbitrary = do
+    absorrel <- elements [Abs, Rel]
+    orient <- elements $ Map.keys knownOrientations
+    return $ absorrel orient
+
+instance Arbitrary SingleObject where
+  arbitrary = oneof $ [elements defaultObjects >>= return . SingleObject,
+    do
+      obj <- elements defaultObjects
+      orient <- arbitrary
+      return $ SingleObject_Orientation orient obj]
+
+instance Arbitrary ObjectExpr where
+  arbitrary = sized arbSized_ObjectExpr where
+    arbSized_ObjectExpr :: Int -> Gen ObjectExpr
+    arbSized_ObjectExpr 0 = arbitrary >>= return . ObjectExpr_Single
+    arbSized_ObjectExpr n = do
+      split <- choose (0,n)
+      l <- arbSized_ObjectExpr split
+      r <- arbSized_ObjectExpr (n-split)
+      op <- elements [And_Obj, Or_Obj]
+      return $ ObjectExpr_Bin op l r
+
+
+newtype KnownObjects = KnownObjects [String] deriving (Show)
 instance Arbitrary KnownObjects where
   arbitrary = KnownObjects <$>
     (listOf . elements $ defaultObjects) `suchThat` hasNoDups

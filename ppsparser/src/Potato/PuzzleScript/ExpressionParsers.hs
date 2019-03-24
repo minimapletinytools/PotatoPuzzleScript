@@ -74,12 +74,12 @@ parse_AbsOrRel :: PotatoParser (a -> AbsOrRel a)
 parse_AbsOrRel = try (PT.symbol "Abs" >> return Abs) <|> try (PT.symbol "Rel" >> return Rel) <|> return Abs
 
 parse_Orientation :: PotatoParser Orientation
-parse_Orientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys orientations))
+parse_Orientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys knownOrientations))
 
 parse_ROrientation :: PotatoParser ROrientation
 parse_ROrientation = do
   absorrel <- parse_AbsOrRel
-  let parseOrientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys orientations))
+  let parseOrientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys knownOrientations))
   name <- maybeParens parseOrientation
   return $ absorrel name
 

@@ -1,3 +1,4 @@
+-fix orientation abs/rel nonsense?
 -add plus operator to rule expr (parse_RuleGroup)
 -add late rule support
 -add commands

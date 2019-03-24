@@ -19,9 +19,11 @@ module Potato.PuzzleScript.Types (
   Command,
   Color,
   LegendKey,
-  ObjectMap, VelocityMap, OrientationMap, LegendMap,
-
-  orientations,
+  ObjectMap,
+  LegendMap,
+  OrientationMap,
+  knownOrientations,
+  VelocityMap,
   knownVelocities,
 
   BooleanBinOp(..),
@@ -84,13 +86,13 @@ type Color = String
 -- one idea is to do Map.Map Orientation (AbsOrRel Rotation)
 -- and ROrientation Abs/Rel overrides Rotation Abs/Rel when used
 type OrientationMap = Map.Map Orientation Rotation
+knownOrientations :: OrientationMap
+knownOrientations = Map.fromList [("R_FORWARD", zeroRotation)]
+
 type VelocityMap = Map.Map Velocity TR
 knownVelocities :: VelocityMap
 knownVelocities = Map.fromList [("v", identity),("^", identity),(">", identity),("<", identity)]
 
--- TODO finish
-orientations :: OrientationMap
-orientations = Map.fromList [("R_UP", undefined)]
 type ObjectMap = Map.Map Object Color
 type LegendKey = Char
 type LegendMap = Map.Map LegendKey ObjectExpr
