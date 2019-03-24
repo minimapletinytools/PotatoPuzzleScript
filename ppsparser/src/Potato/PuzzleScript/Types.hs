@@ -39,7 +39,8 @@ module Potato.PuzzleScript.Types (
 
   PatBinOp(..),
   PatternObj(..),
-  Pattern,
+  Pattern(..),
+  Patterns(..),
 
   RuleBinOp(..),
   Command,
@@ -160,10 +161,19 @@ instance Show PatternObj where
   show (PatternObject_Velocity vel obj) = show vel ++ " " ++ show obj
 
 -- TODO may want to add more separators, not just the | that inherits scope
-type Pattern = [PatternObj]
+data Pattern = Pattern_PatternObj PatternObj | Pattern_Bin PatBinOp PatternObj Pattern
 
--- TODO patterns
---type Patterns = [Pattern]
+showPattern_ :: Pattern -> String
+showPattern_ (Pattern_PatternObj p) = show p
+showPattern_ (Pattern_Bin op p1 p2) = show p1 ++ " " ++ show op ++ " " ++ showPattern_ p2
+instance Show Pattern where
+  show p = "[ " ++ showPattern_ p ++ " ]"
+
+newtype Patterns = Patterns [Pattern] deriving (Show)
+
+--instance Show Patterns where
+  --show (Patterns []) = ""
+  --show (Patterns (x:xs)) = show x ++ " " ++ show xs
 
 indentOnce :: String -> String
 indentOnce = concat . map ("    " ++) . lines
@@ -172,7 +182,8 @@ data RuleBinOp = Arrow
 instance Show RuleBinOp where
   show Arrow = "->"
 
-data UnscopedRule = UnscopedRule_Pattern Pattern Pattern | UnscopedRule_Rule Pattern Rule | UnscopedRule_Boolean Boolean Rule
+-- TODO rename to UnscopedRule_Patterns
+data UnscopedRule = UnscopedRule_Pattern Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule
 instance Show UnscopedRule where
   show (UnscopedRule_Pattern p1 p2) = show p1 ++ " -> " ++ show p2
   show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)

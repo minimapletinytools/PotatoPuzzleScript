@@ -169,40 +169,48 @@ parse_PatternObj lm@(om,_) =
   try (parse_ObjectExpr om >>= return . PatternObject) <?>
   "PatternObj"
 
+
 parse_Pattern :: LookupMaps -> PotatoParser Pattern
-parse_Pattern lm = PT.brackets $ sepBy (parse_PatternObj lm) parse_PatBinOp
+parse_Pattern lm = PT.brackets $ do
+  first <- (parse_PatternObj lm)
+  rest <- many $ do
+    op <- parse_PatBinOp
+    p <- (parse_PatternObj lm)
+    return (op, p)
+  return $ foldr (\(op, p) acc -> (\p' -> Pattern_Bin op p' (acc p))) Pattern_PatternObj rest $ first
 
-
+parse_Patterns :: LookupMaps -> PotatoParser Patterns
+parse_Patterns lm = many (parse_Pattern lm) >>= return . Patterns
 
 parse_RuleBinOp :: PotatoParser RuleBinOp
 parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
 
 -- TODO validate same num args
 -- TODO validate elipses are in the same position
-validate_PatternObjPair :: PatternObj -> PatternObj -> Maybe String
-validate_PatternObjPair lhs rhs = Nothing
+validate_PatternPair :: Pattern -> Pattern -> Maybe String
+validate_PatternPair lhs rhs = Nothing
 
 -- | validate_UnscopedRule_Pattern checks if an UnscopedRule is valid
 -- returns Nothing if rule is valid
 validate_UnscopedRule_Pattern :: UnscopedRule -> Maybe String
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern [] []) = Nothing
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern _ []) = Just "Pattern count mismatch"
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern [] _) = Just "Pattern count mismatch"
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern (x:xs) (y:ys)) = case validate_PatternObjPair x y of
-  Nothing -> validate_UnscopedRule_Pattern (UnscopedRule_Pattern xs ys)
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns []) (Patterns[])) = Nothing
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern _ (Patterns[])) = Just "Pattern count mismatch"
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns[]) _) = Just "Pattern count mismatch"
+validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns (x:xs)) (Patterns (y:ys))) = case validate_PatternPair x y of
+  Nothing -> validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns xs) (Patterns ys))
   just -> just
 validate_UnscopedRule_Pattern _ = Just "Not a pattern match rule"
 
 parse_UnscopedRule_Pattern :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule_Pattern lm = do
-  p1 <- parse_Pattern lm
+  p1 <- parse_Patterns lm
   parse_RuleBinOp
-  p2 <- parse_Pattern lm
+  p2 <- parse_Patterns lm
   return $ UnscopedRule_Pattern p1 p2
 
 parse_UnscopedRule_Rule :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule_Rule lm = do
-  p <- parse_Pattern lm
+  p <- parse_Patterns lm
   parse_RuleBinOp
   r <- parse_Rule lm
   return $ UnscopedRule_Rule p r

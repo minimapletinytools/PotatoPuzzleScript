@@ -60,18 +60,18 @@ initLevelState lm (Level (x,_,_) entries _) = L.ifoldl outfoldfn Map.empty entri
 
 
 -- orientation of found pattern is always relative to FORWARD so only a position is provided
-findPatternObj :: ExecutionCtx -> PatternObj -> Maybe Translation
-findPatternObj ctx pattern = undefined
+findPattern :: ExecutionCtx -> Pattern -> Maybe Translation
+findPattern ctx pattern = undefined
 
-findPattern :: ExecutionCtx -> Pattern -> Maybe [Translation]
-findPattern ctx pattern = forM pattern (findPatternObj ctx)
+findPatterns :: ExecutionCtx -> Patterns -> Maybe [Translation]
+findPatterns ctx (Patterns pattern) = forM pattern (findPattern ctx)
 
 applyRule_PatternOnce :: UnscopedRule -> ExecutionCtx -> (ExecutionCtx, Bool)
 applyRule_PatternOnce (UnscopedRule_Pattern lhs rhs) ctx = undefined
 
 applyUnscopedRule :: UnscopedRule -> ExecutionCtx -> ExecutionCtx
 applyUnscopedRule (UnscopedRule_Pattern lhs rhs) ctx = undefined
-applyUnscopedRule (UnscopedRule_Rule lhs rule) ctx = if isJust $ findPattern ctx lhs
+applyUnscopedRule (UnscopedRule_Rule (Patterns lhs) rule) ctx = if isJust $ forM lhs (findPattern ctx)
   then applyRule rule ctx
   else ctx
 applyUnscopedRule (UnscopedRule_Boolean lhs rule) ctx = undefined
