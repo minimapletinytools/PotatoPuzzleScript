@@ -84,9 +84,8 @@ parseObjects = do
 
 parseLegend :: PotatoParser ()
 parseLegend = do
-  om <- getState >>= return . _objectList
   manyTillHeaderOrEoF $ do
-    LegendExpr key value <- parse_LegendExpr om
+    LegendExpr key value <- parse_LegendExpr
     modifyState (over legend (Map.insert key value))
   return ()
 
@@ -96,11 +95,10 @@ parseSounds = void $ manyTillHeaderOrEoF parseLine
 
 parseCollisionLayers :: PotatoParser ()
 parseCollisionLayers = do
-  objects <- getState >>= return . _objectList
   manyTillHeaderOrEoF $ do
     -- parse each layer as comma separated objects
     -- TODO switch to SingleObject
-    r <- PT.commaSep (parse_Object objects)
+    r <- PT.commaSep parse_Object
     modifyState (over collisionLayers (r:))
     PT.whiteSpace
   return ()
@@ -110,19 +108,17 @@ parseCollisionLayers = do
 
 parseRules :: PotatoParser ()
 parseRules = do
-  objects <- getState >>= return . _objectList
-  r <- manyTillHeaderOrEoF $ parse_Rule (objects, knownVelocities)
+  r <- manyTillHeaderOrEoF $ parse_Rule
   --manyTillHeaderOrEoF parseLine
   modifyState (set rules r)
   return ()
 
 parseWinConditions :: PotatoParser ()
 parseWinConditions = do
-  om <- getState >>= return . _objectList
   PT.whiteSpace
   manyTillHeaderOrEoF $ do
     -- parse each layer as comma separated objects
-    r <- parse_WinCond om
+    r <- parse_WinCond
     modifyState (over winConditions (r:))
     PT.whiteSpace
   return ()
@@ -175,10 +171,6 @@ parseMultiLevel = do
 
 parseLevels :: PotatoParser ()
 parseLevels = do
-  state <- getState
-  let
-    objects = _objectList state
-    legend = _legend state
   PT.whiteSpace
   manyTillHeaderOrEoF $ do
     level <- parseMultiLevel <|> parseLevel <?> "valid level definition"

@@ -22,8 +22,6 @@ import Data.Functor.Identity (Identity)
 import Text.Parsec
 import Text.Parsec.Expr
 
-type LookupMaps = (ObjectMap, VelocityMap)
-
 guardError :: Bool -> String -> PotatoParser ()
 guardError b msg = if b then return () else fail msg
 
@@ -63,8 +61,9 @@ parse_Command = do
   --guardError (Map.member name om) ("unknown object " ++ name)
   return name
 
-parse_Object :: ObjectMap -> PotatoParser Object
-parse_Object om = do
+parse_Object :: PotatoParser Object
+parse_Object = do
+  om <- getState >>= return . _objectList
   name <- PT.identifier
   guardError (Map.member name om) ("unknown object " ++ name)
   return name
@@ -81,14 +80,16 @@ parse_ROrientation = do
   name <- maybeParens parse_Orientation
   return $ absorrel name
 
-parse_Velocity :: VelocityMap -> PotatoParser Velocity
-parse_Velocity vm = do
+parse_Velocity :: PotatoParser Velocity
+parse_Velocity = do
+  let vm = knownVelocities
   name <- PT.identifier <|> PT.operator
   guardError (Map.member name vm) ("unknown velocity " ++ name)
   return name
 
-parse_RVelocity :: VelocityMap -> PotatoParser RVelocity
-parse_RVelocity vm = do
+parse_RVelocity :: PotatoParser RVelocity
+parse_RVelocity = do
+  let vm = knownVelocities
   absorrel <- parse_AbsOrRel
   let parseVel = PT.identifier <|> PT.operator
   name <- maybeParens parseVel
@@ -96,14 +97,14 @@ parse_RVelocity vm = do
   return $ absorrel name
 
 
-parse_SingleObject_Orientation :: ObjectMap -> PotatoParser SingleObject
-parse_SingleObject_Orientation om = do
+parse_SingleObject_Orientation :: PotatoParser SingleObject
+parse_SingleObject_Orientation = do
   orient <- parse_ROrientation
-  obj <- parse_Object om
+  obj <- parse_Object
   return $ SingleObject_Orientation orient obj
 
-parse_SingleObject :: ObjectMap -> PotatoParser SingleObject
-parse_SingleObject om = (try (parse_Object om >>= return . SingleObject) <|> parse_SingleObject_Orientation om)
+parse_SingleObject :: PotatoParser SingleObject
+parse_SingleObject = (try (parse_Object >>= return . SingleObject) <|> parse_SingleObject_Orientation)
 
 
 opTable_ObjectExpr :: [[Operator T.Text Output Identity ObjectExpr]]
@@ -111,19 +112,19 @@ opTable_ObjectExpr =
   [[Infix (PT.reservedOp "and" >> return (ObjectExpr_Bin And_Obj)) AssocLeft],
   [Infix (PT.reservedOp "or" >> return (ObjectExpr_Bin Or_Obj)) AssocLeft]]
 
-parse_ObjectExpr_Term :: ObjectMap -> PotatoParser ObjectExpr
-parse_ObjectExpr_Term om = (PT.parens (parse_ObjectExpr om) <|> (parse_SingleObject om >>= return . ObjectExpr_Single))
+parse_ObjectExpr_Term :: PotatoParser ObjectExpr
+parse_ObjectExpr_Term = PT.parens parse_ObjectExpr <|> (parse_SingleObject >>= return . ObjectExpr_Single)
 
-parse_ObjectExpr :: ObjectMap -> PotatoParser ObjectExpr
-parse_ObjectExpr om = buildExpressionParser opTable_ObjectExpr (parse_ObjectExpr_Term om) <?> "ObjectExpr"
+parse_ObjectExpr :: PotatoParser ObjectExpr
+parse_ObjectExpr = buildExpressionParser opTable_ObjectExpr parse_ObjectExpr_Term <?> "ObjectExpr"
 
 
 
-parse_LegendExpr :: ObjectMap -> PotatoParser LegendExpr
-parse_LegendExpr om = do
+parse_LegendExpr :: PotatoParser LegendExpr
+parse_LegendExpr = do
   (key:[]) <- try PT.identifier <|> try PT.operator <?> "unreserved char"
   PT.reservedOp "="
-  value <- parse_ObjectExpr om
+  value <- parse_ObjectExpr
   return $ LegendExpr key value
 
 parse_WinUnOp :: PotatoParser WinUnOp
@@ -136,49 +137,48 @@ parse_WinUnOp =
 parse_WinBinOp :: PotatoParser WinBinOp
 parse_WinBinOp = PT.reservedOp "on" >> return Win_On
 
-parse_BasicWinCond :: ObjectMap -> PotatoParser BasicWinCond
-parse_BasicWinCond om = do
+parse_BasicWinCond :: PotatoParser BasicWinCond
+parse_BasicWinCond = do
   op <- parse_WinUnOp
-  obj <- parse_SingleObject om
+  obj <- parse_SingleObject
   return $ BasicWinCond op obj
 
-parse_WinCondBinOp :: ObjectMap -> PotatoParser WinCond
-parse_WinCondBinOp om = do
-  exp1 <- parse_BasicWinCond om
+parse_WinCondBinOp :: PotatoParser WinCond
+parse_WinCondBinOp = do
+  exp1 <- parse_BasicWinCond
   op <- parse_WinBinOp
-  exp2 <- parse_SingleObject om
+  exp2 <- parse_SingleObject
   return $ WinCond_Bin op exp1 exp2
 
-parse_WinCond :: ObjectMap -> PotatoParser WinCond
-parse_WinCond om = try (parse_WinCondBinOp om) <|> (parse_BasicWinCond om >>= return . WinCond_Basic)
+parse_WinCond :: PotatoParser WinCond
+parse_WinCond = try parse_WinCondBinOp <|> (parse_BasicWinCond >>= return . WinCond_Basic)
 
 parse_PatBinOp :: PotatoParser PatBinOp
 parse_PatBinOp = do PT.reservedOp "|" >> return Pipe
 
-parse_PatternObject_Velocity :: LookupMaps -> PotatoParser PatternObj
-parse_PatternObject_Velocity (om,vm) = do
-  v <- parse_RVelocity vm
-  obj <- parse_SingleObject om
+parse_PatternObject_Velocity :: PotatoParser PatternObj
+parse_PatternObject_Velocity = do
+  v <- parse_RVelocity
+  obj <- parse_SingleObject
   return $ PatternObject_Velocity v obj
 
-parse_PatternObj :: LookupMaps -> PotatoParser PatternObj
-parse_PatternObj lm@(om,_) =
-  try (parse_PatternObject_Velocity lm) <|>
-  try (parse_ObjectExpr om >>= return . PatternObject) <?>
+parse_PatternObj :: PotatoParser PatternObj
+parse_PatternObj =
+  try parse_PatternObject_Velocity <|>
+  try (parse_ObjectExpr >>= return . PatternObject) <?>
   "PatternObj"
 
-
-parse_Pattern :: LookupMaps -> PotatoParser Pattern
-parse_Pattern lm = PT.brackets $ do
-  first <- (parse_PatternObj lm)
+parse_Pattern :: PotatoParser Pattern
+parse_Pattern = PT.brackets $ do
+  first <- parse_PatternObj
   rest <- many $ do
     op <- parse_PatBinOp
-    p <- (parse_PatternObj lm)
+    p <- parse_PatternObj
     return (op, p)
   return $ foldr (\(op, p) acc -> (\p' -> Pattern_Bin op p' (acc p))) Pattern_PatternObj rest $ first
 
-parse_Patterns :: LookupMaps -> PotatoParser Patterns
-parse_Patterns lm = sepBy (parse_Pattern lm) (oneOf " \t") >>= return . Patterns
+parse_Patterns :: PotatoParser Patterns
+parse_Patterns = sepBy parse_Pattern (oneOf " \t") >>= return . Patterns
 
 parse_RuleBinOp :: PotatoParser RuleBinOp
 parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
@@ -199,40 +199,40 @@ validate_UnscopedRule_Patterns (UnscopedRule_Patterns (Patterns (x:xs)) (Pattern
   just -> just
 validate_UnscopedRule_Patterns _ = Just "Not a pattern match rule"
 
-parse_UnscopedRule_Patterns :: LookupMaps -> PotatoParser UnscopedRule
-parse_UnscopedRule_Patterns lm = do
-  p1 <- parse_Patterns lm
+parse_UnscopedRule_Patterns :: PotatoParser UnscopedRule
+parse_UnscopedRule_Patterns = do
+  p1 <- parse_Patterns
   parse_RuleBinOp
-  p2 <- parse_Patterns lm
+  p2 <- parse_Patterns
   return $ UnscopedRule_Patterns p1 p2
 
-parse_UnscopedRule_Rule :: LookupMaps -> PotatoParser UnscopedRule
-parse_UnscopedRule_Rule lm = do
-  p <- parse_Patterns lm
+parse_UnscopedRule_Rule :: PotatoParser UnscopedRule
+parse_UnscopedRule_Rule = do
+  p <- parse_Patterns
   parse_RuleBinOp
-  r <- parse_Rule lm
+  r <- parse_Rule
   return $ UnscopedRule_Rule p r
 
 
-parse_UnscopedRule_Boolean :: LookupMaps -> PotatoParser UnscopedRule
-parse_UnscopedRule_Boolean lm = do
+parse_UnscopedRule_Boolean :: PotatoParser UnscopedRule
+parse_UnscopedRule_Boolean = do
   p <- parse_Boolean
   parse_RuleBinOp
-  r <- parse_Rule lm
+  r <- parse_Rule
   return $ UnscopedRule_Boolean p r
 
 
-parse_UnscopedRule :: LookupMaps -> PotatoParser UnscopedRule
-parse_UnscopedRule lm =
-  try (parse_UnscopedRule_Boolean lm) <|>
-  try (parse_UnscopedRule_Rule lm) <|>
-  try (parse_UnscopedRule_Patterns lm) <?>
+parse_UnscopedRule :: PotatoParser UnscopedRule
+parse_UnscopedRule =
+  try parse_UnscopedRule_Boolean <|>
+  try parse_UnscopedRule_Rule <|>
+  try parse_UnscopedRule_Patterns <?>
   "UnscopedRule"
 
-parse_Rule_Scoped :: LookupMaps -> PotatoParser Rule
-parse_Rule_Scoped lm@(_,vm) = do
-  v <- parse_Velocity vm
-  r <- parse_UnscopedRule lm
+parse_Rule_Scoped :: PotatoParser Rule
+parse_Rule_Scoped = do
+  v <- parse_Velocity
+  r <- parse_UnscopedRule
   return $ Rule_Scoped v r
 
 -- do we support multi nested loops?
@@ -240,9 +240,9 @@ parse_Rule_Scoped lm@(_,vm) = do
 --parse_Rule_Looped lm = do
 --  rules <- between (PT.reserved "startLoop") (PT.reserved "endLoop") parse_Rule
 
-parse_Rule :: LookupMaps -> PotatoParser Rule
-parse_Rule lm =
-  try (parse_Rule_Scoped lm) <|>
-  try (parse_UnscopedRule lm >>= return . Rule) <|>
+parse_Rule :: PotatoParser Rule
+parse_Rule =
+  try parse_Rule_Scoped <|>
+  try (parse_UnscopedRule >>= return . Rule) <|>
   try (parse_Command >>= return . Rule_Command) <?>
   "Rule"

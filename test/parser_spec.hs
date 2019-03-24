@@ -83,12 +83,12 @@ instance Arbitrary ObjectExpr where
       return $ ObjectExpr_Bin op l r
 
 prop_parseObject :: KnownObject -> Bool
-prop_parseObject (KnownObject obj) = case runParser (parse_Object defaultObjectMap) defaultOutput "(test)" (T.pack $ obj) of
+prop_parseObject (KnownObject obj) = case runParser parse_Object defaultOutput "(test)" (T.pack $ obj) of
   Left err -> trace (show err) $ False
   Right x -> obj == x
 
 prop_parseObjectExpr :: ObjectExpr -> Bool
-prop_parseObjectExpr expr = case runParser (parse_ObjectExpr defaultObjectMap) defaultOutput "(test)" (T.pack $ show expr) of
+prop_parseObjectExpr expr = case runParser parse_ObjectExpr defaultOutput "(test)" (T.pack $ show expr) of
   Left err -> trace (show err) $ False
   Right x -> expr == x
   --Right x -> trace (show expr ++ " =? " ++ show x) $ expr == x
