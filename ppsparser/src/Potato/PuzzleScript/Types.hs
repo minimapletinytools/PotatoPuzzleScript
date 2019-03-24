@@ -182,10 +182,9 @@ data RuleBinOp = Arrow
 instance Show RuleBinOp where
   show Arrow = "->"
 
--- TODO rename to UnscopedRule_Patterns
-data UnscopedRule = UnscopedRule_Pattern Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule
+data UnscopedRule = UnscopedRule_Patterns Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule
 instance Show UnscopedRule where
-  show (UnscopedRule_Pattern p1 p2) = show p1 ++ " -> " ++ show p2
+  show (UnscopedRule_Patterns p1 p2) = show p1 ++ " -> " ++ show p2
   show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)
   show (UnscopedRule_Boolean b r) = show b ++ " -> " ++ indentOnce (show r)
 

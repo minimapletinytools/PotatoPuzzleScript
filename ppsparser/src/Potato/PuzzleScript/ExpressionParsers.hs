@@ -190,23 +190,23 @@ parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
 validate_PatternPair :: Pattern -> Pattern -> Maybe String
 validate_PatternPair lhs rhs = Nothing
 
--- | validate_UnscopedRule_Pattern checks if an UnscopedRule is valid
+-- | validate_UnscopedRule_Patterns checks if an UnscopedRule is valid
 -- returns Nothing if rule is valid
-validate_UnscopedRule_Pattern :: UnscopedRule -> Maybe String
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns []) (Patterns[])) = Nothing
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern _ (Patterns[])) = Just "Pattern count mismatch"
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns[]) _) = Just "Pattern count mismatch"
-validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns (x:xs)) (Patterns (y:ys))) = case validate_PatternPair x y of
-  Nothing -> validate_UnscopedRule_Pattern (UnscopedRule_Pattern (Patterns xs) (Patterns ys))
+validate_UnscopedRule_Patterns :: UnscopedRule -> Maybe String
+validate_UnscopedRule_Patterns (UnscopedRule_Patterns (Patterns []) (Patterns[])) = Nothing
+validate_UnscopedRule_Patterns (UnscopedRule_Patterns _ (Patterns[])) = Just "Pattern count mismatch"
+validate_UnscopedRule_Patterns (UnscopedRule_Patterns (Patterns[]) _) = Just "Pattern count mismatch"
+validate_UnscopedRule_Patterns (UnscopedRule_Patterns (Patterns (x:xs)) (Patterns (y:ys))) = case validate_PatternPair x y of
+  Nothing -> validate_UnscopedRule_Patterns (UnscopedRule_Patterns (Patterns xs) (Patterns ys))
   just -> just
-validate_UnscopedRule_Pattern _ = Just "Not a pattern match rule"
+validate_UnscopedRule_Patterns _ = Just "Not a pattern match rule"
 
-parse_UnscopedRule_Pattern :: LookupMaps -> PotatoParser UnscopedRule
-parse_UnscopedRule_Pattern lm = do
+parse_UnscopedRule_Patterns :: LookupMaps -> PotatoParser UnscopedRule
+parse_UnscopedRule_Patterns lm = do
   p1 <- parse_Patterns lm
   parse_RuleBinOp
   p2 <- parse_Patterns lm
-  return $ UnscopedRule_Pattern p1 p2
+  return $ UnscopedRule_Patterns p1 p2
 
 parse_UnscopedRule_Rule :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule_Rule lm = do
@@ -228,7 +228,7 @@ parse_UnscopedRule :: LookupMaps -> PotatoParser UnscopedRule
 parse_UnscopedRule lm =
   try (parse_UnscopedRule_Boolean lm) <|>
   try (parse_UnscopedRule_Rule lm) <|>
-  try (parse_UnscopedRule_Pattern lm) <?>
+  try (parse_UnscopedRule_Patterns lm) <?>
   "UnscopedRule"
 
 parse_Rule_Scoped :: LookupMaps -> PotatoParser Rule

@@ -67,10 +67,10 @@ findPatterns :: ExecutionCtx -> Patterns -> Maybe [Translation]
 findPatterns ctx (Patterns pattern) = forM pattern (findPattern ctx)
 
 applyRule_PatternOnce :: UnscopedRule -> ExecutionCtx -> (ExecutionCtx, Bool)
-applyRule_PatternOnce (UnscopedRule_Pattern lhs rhs) ctx = undefined
+applyRule_PatternOnce (UnscopedRule_Patterns lhs rhs) ctx = undefined
 
 applyUnscopedRule :: UnscopedRule -> ExecutionCtx -> ExecutionCtx
-applyUnscopedRule (UnscopedRule_Pattern lhs rhs) ctx = undefined
+applyUnscopedRule (UnscopedRule_Patterns lhs rhs) ctx = undefined
 applyUnscopedRule (UnscopedRule_Rule (Patterns lhs) rule) ctx = if isJust $ forM lhs (findPattern ctx)
   then applyRule rule ctx
   else ctx
