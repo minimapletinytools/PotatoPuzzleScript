@@ -68,7 +68,11 @@ data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITION
 allHeaders :: [Header]
 allHeaders = enumFrom OBJECTS
 
-data AbsOrRel a = Abs a | Rel a deriving (Functor, Show)
+data AbsOrRel a = Abs a | Rel a deriving (Functor, Eq)
+
+instance Show (AbsOrRel String) where
+  show (Abs x) = "Abs " ++ x
+  show (Rel x) = "Rel " ++ x
 
 type Object = String
 -- TODO make Object var for "..."
@@ -103,12 +107,12 @@ type LevelSlice = U.Vector Char
 -- level is from x y z order min to max
 data Level = Level Size [LevelSlice] String deriving(Show)
 
-data KeyboardInput = K_NONE | K_LEFT | K_RIGHT | K_DOWN | K_UP | K_Z | K_X deriving(Show, Read, Enum)
+data KeyboardInput = K_NONE | K_LEFT | K_RIGHT | K_DOWN | K_UP | K_Z | K_X deriving(Show, Read, Eq, Enum)
 allKeyboardInputs :: [KeyboardInput]
 allKeyboardInputs = enumFrom K_LEFT
 
-data BooleanBinOp = And | Or deriving(Show)
-data Boolean = Boolean_Var String | Boolean_Input KeyboardInput | Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean
+data BooleanBinOp = And | Or deriving(Show, Eq)
+data Boolean = Boolean_Var String | Boolean_Input KeyboardInput | Boolean_True | Boolean_False | Boolean_Not Boolean | Boolean_Bin BooleanBinOp Boolean Boolean deriving(Eq)
 instance Show Boolean where
   show (Boolean_Var s) = s
   show (Boolean_Input input) = show input
@@ -117,53 +121,58 @@ instance Show Boolean where
   show (Boolean_Not b) = "Not " ++ show b
   show (Boolean_Bin op b1 b2) = show b1 ++ " " ++ show op ++ " " ++ show b2
 
-data ObjBinOp = And_Obj | Or_Obj deriving(Show)
-data SingleObject = SingleObject Object | SingleObject_Orientation ROrientation Object
+data ObjBinOp = And_Obj | Or_Obj deriving(Eq)
+instance Show ObjBinOp where
+  show And_Obj = "and"
+  show Or_Obj = "or"
+
+data SingleObject = SingleObject Object | SingleObject_Orientation ROrientation Object deriving(Eq)
 instance Show SingleObject where
   show (SingleObject obj) = obj
   show (SingleObject_Orientation orient obj) = show orient ++ " " ++ obj
+  --show (SingleObject_Orientation orient obj) = "(" ++ show orient ++ " " ++ obj ++ ")"
 
-data ObjectExpr = ObjectExpr_Single SingleObject| ObjectExpr_Bin ObjBinOp ObjectExpr ObjectExpr
+data ObjectExpr = ObjectExpr_Single SingleObject| ObjectExpr_Bin ObjBinOp ObjectExpr ObjectExpr deriving(Eq)
 instance Show ObjectExpr where
   show (ObjectExpr_Single obj) = show obj
-  show (ObjectExpr_Bin op exp1 exp2) = show exp1 ++ " " ++ show op ++ " " ++ show exp2
+  show (ObjectExpr_Bin op exp1 exp2) = "(" ++ show exp1 ++ " " ++ show op ++ " " ++ show exp2 ++ ")"
 
-data LegendExpr = LegendExpr Char ObjectExpr
+data LegendExpr = LegendExpr Char ObjectExpr deriving(Eq)
 instance Show LegendExpr where
   show (LegendExpr k v) = show k ++ " = " ++ show v
 
-data WinUnOp = Win_All | Win_Some | Win_No
+data WinUnOp = Win_All | Win_Some | Win_No deriving(Eq)
 instance Show WinUnOp where
   show Win_All = "All"
   show Win_Some = "Some"
   show Win_No = "No"
-data WinBinOp = Win_On
 
+data WinBinOp = Win_On deriving(Eq)
 instance Show WinBinOp where
   show Win_On = "on"
 
-data BasicWinCond = BasicWinCond WinUnOp SingleObject
+data BasicWinCond = BasicWinCond WinUnOp SingleObject deriving(Eq)
 instance Show BasicWinCond where
   show (BasicWinCond op obj) = show op ++ " " ++ show obj
 
 -- TODO rename to WinCondExpr
-data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond SingleObject
+data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond SingleObject deriving(Eq)
 instance Show WinCond where
   show (WinCond_Basic bwc) = show bwc
   show (WinCond_Bin op bwc obj) = show bwc ++ " " ++ show op ++ " " ++ show obj
 
 
-data PatBinOp = Pipe
+data PatBinOp = Pipe deriving(Eq)
 instance Show PatBinOp where
   show Pipe = "|"
 -- velocity restricted to single objects for now
-data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity RVelocity SingleObject
+data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity RVelocity SingleObject deriving(Eq)
 instance Show PatternObj where
   show (PatternObject expr) = show expr
   show (PatternObject_Velocity vel obj) = show vel ++ " " ++ show obj
 
 -- TODO may want to add more separators, not just the | that inherits scope
-data Pattern = Pattern_PatternObj PatternObj | Pattern_Bin PatBinOp PatternObj Pattern
+data Pattern = Pattern_PatternObj PatternObj | Pattern_Bin PatBinOp PatternObj Pattern deriving(Eq)
 
 showPattern_ :: Pattern -> String
 showPattern_ (Pattern_PatternObj p) = show p
@@ -171,30 +180,32 @@ showPattern_ (Pattern_Bin op p1 p2) = show p1 ++ " " ++ show op ++ " " ++ showPa
 instance Show Pattern where
   show p = "[ " ++ showPattern_ p ++ " ]"
 
-newtype Patterns = Patterns [Pattern]
+newtype Patterns = Patterns [Pattern] deriving(Eq)
 
 instance Show Patterns where
   show (Patterns []) = ""
-  show (Patterns (x:xs)) = show x ++ " " ++ show xs
+  show (Patterns (x:xs)) = show x ++ " " ++ show (Patterns xs)
 
 indentOnce :: String -> String
 indentOnce = concat . map ("    " ++) . lines
 
-data RuleBinOp = Arrow
+data RuleBinOp = Arrow deriving(Eq)
 instance Show RuleBinOp where
   show Arrow = "->"
 
-data UnscopedRule = UnscopedRule_Patterns Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule
+data UnscopedRule = UnscopedRule_Patterns Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule deriving(Eq)
 instance Show UnscopedRule where
   show (UnscopedRule_Patterns p1 p2) = show p1 ++ " -> " ++ show p2
   show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)
-  show (UnscopedRule_Boolean b r) = show b ++ " -> " ++ indentOnce (show r)
+  show (UnscopedRule_Boolean b r) = show b ++ " ->\n" ++ indentOnce (show r)
 
-data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule
+data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Eq)
 instance Show Rule where
   show (Rule_Command c) = show c
   show (Rule r) = show r
   show (Rule_Scoped vel r) = show vel ++ " " ++ show r
+
+
 
 -- TODO RuleGroup [Rule]
 

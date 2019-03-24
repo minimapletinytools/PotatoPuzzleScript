@@ -2,9 +2,11 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 import Potato.PuzzleScript
+import Potato.PuzzleScript.ExpressionParsers
 
 import Text.Parsec
 
+import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.List (nub, intersperse)
 import qualified Data.Set as Set
@@ -38,14 +40,17 @@ prop_hasNoDups xs = hasNoDups xs === (nub xs == xs)
 -- predefined list of objects we will use in our test
 -- can we be even more awesome and generate these inside a test?
 defaultObjects :: [String]
-defaultObjects = map (\x -> "Obj"++show x) [(1::Int)..20]
+defaultObjects = map (\x -> "object"++show x) [(1::Int)..20]
+
+defaultObjectMap :: ObjectMap
+defaultObjectMap = Map.fromList (map (,"white") defaultObjects)
 
 anObject :: String
 anObject = head defaultObjects
 
 defaultOutput :: Output
 defaultOutput = emptyOutput {
-    _objectList = Map.fromList (map (,"white") defaultObjects)
+    _objectList = defaultObjectMap
   }
 
 
@@ -55,10 +60,14 @@ instance Arbitrary ROrientation where
     orient <- elements $ Map.keys knownOrientations
     return $ absorrel orient
 
+newtype KnownObject = KnownObject Object deriving(Show)
+instance Arbitrary KnownObject where
+  arbitrary = elements defaultObjects >>= return . KnownObject
+
 instance Arbitrary SingleObject where
   arbitrary = oneof $ [elements defaultObjects >>= return . SingleObject,
     do
-      obj <- elements defaultObjects
+      KnownObject obj <- arbitrary
       orient <- arbitrary
       return $ SingleObject_Orientation orient obj]
 
@@ -67,11 +76,26 @@ instance Arbitrary ObjectExpr where
     arbSized_ObjectExpr :: Int -> Gen ObjectExpr
     arbSized_ObjectExpr 0 = arbitrary >>= return . ObjectExpr_Single
     arbSized_ObjectExpr n = do
-      split <- choose (0,n)
+      split <- choose (0,n-1)
       l <- arbSized_ObjectExpr split
-      r <- arbSized_ObjectExpr (n-split)
+      r <- arbSized_ObjectExpr (n-split-1)
       op <- elements [And_Obj, Or_Obj]
       return $ ObjectExpr_Bin op l r
+
+prop_parseObject :: KnownObject -> Bool
+prop_parseObject (KnownObject obj) = case runParser (parse_Object defaultObjectMap) defaultOutput "(test)" (T.pack $ obj) of
+  Left err -> trace (show err) $ False
+  Right x -> obj == x
+
+prop_parseObjectExpr :: ObjectExpr -> Bool
+prop_parseObjectExpr expr = case runParser (parse_ObjectExpr defaultObjectMap) defaultOutput "(test)" (T.pack $ show expr) of
+  Left err -> trace (show err) $ False
+  Right x -> expr == x
+  --Right x -> trace (show expr ++ " =? " ++ show x) $ expr == x
+
+
+
+
 
 
 newtype KnownObjects = KnownObjects [String] deriving (Show)

@@ -53,7 +53,6 @@ parse_Boolean_Term =
 parse_Boolean :: PotatoParser Boolean
 parse_Boolean = buildExpressionParser opTable_Boolean parse_Boolean_Term <?> "Boolean"
 
-
 parse_Command :: PotatoParser Command
 parse_Command = do
   -- TODO don't fail
@@ -79,8 +78,7 @@ parse_Orientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys 
 parse_ROrientation :: PotatoParser ROrientation
 parse_ROrientation = do
   absorrel <- parse_AbsOrRel
-  let parseOrientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys knownOrientations))
-  name <- maybeParens parseOrientation
+  name <- maybeParens parse_Orientation
   return $ absorrel name
 
 parse_Velocity :: VelocityMap -> PotatoParser Velocity
@@ -105,7 +103,7 @@ parse_SingleObject_Orientation om = do
   return $ SingleObject_Orientation orient obj
 
 parse_SingleObject :: ObjectMap -> PotatoParser SingleObject
-parse_SingleObject om = try (parse_Object om >>= return . SingleObject) <|> parse_SingleObject_Orientation om
+parse_SingleObject om = (try (parse_Object om >>= return . SingleObject) <|> parse_SingleObject_Orientation om)
 
 
 opTable_ObjectExpr :: [[Operator T.Text Output Identity ObjectExpr]]
@@ -114,7 +112,7 @@ opTable_ObjectExpr =
   [Infix (PT.reservedOp "or" >> return (ObjectExpr_Bin Or_Obj)) AssocLeft]]
 
 parse_ObjectExpr_Term :: ObjectMap -> PotatoParser ObjectExpr
-parse_ObjectExpr_Term om = PT.parens (parse_ObjectExpr om) <|> (parse_SingleObject om >>= return . ObjectExpr_Single)
+parse_ObjectExpr_Term om = (PT.parens (parse_ObjectExpr om) <|> (parse_SingleObject om >>= return . ObjectExpr_Single))
 
 parse_ObjectExpr :: ObjectMap -> PotatoParser ObjectExpr
 parse_ObjectExpr om = buildExpressionParser opTable_ObjectExpr (parse_ObjectExpr_Term om) <?> "ObjectExpr"
@@ -180,7 +178,7 @@ parse_Pattern lm = PT.brackets $ do
   return $ foldr (\(op, p) acc -> (\p' -> Pattern_Bin op p' (acc p))) Pattern_PatternObj rest $ first
 
 parse_Patterns :: LookupMaps -> PotatoParser Patterns
-parse_Patterns lm = many (parse_Pattern lm) >>= return . Patterns
+parse_Patterns lm = sepBy (parse_Pattern lm) (oneOf " \t") >>= return . Patterns
 
 parse_RuleBinOp :: PotatoParser RuleBinOp
 parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow

@@ -62,12 +62,15 @@ dependencies:
 
 library:
   source-dirs: src
+  ghc-options:
+  - -O0
 
 executables:
   pps:
     main:                main.hs
     source-dirs:         app
     ghc-options:
+    - -O0
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
@@ -77,6 +80,7 @@ executables:
     main:                vty.hs
     source-dirs:         app
     ghc-options:
+    - -O0
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
@@ -88,6 +92,7 @@ tests:
     main:                parser_spec.hs
     source-dirs:         test
     ghc-options:
+    - -O0
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
@@ -98,6 +103,7 @@ tests:
     main:                math_spec.hs
     source-dirs:         test
     ghc-options:
+    - -O0
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N

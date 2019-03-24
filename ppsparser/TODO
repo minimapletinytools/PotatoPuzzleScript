@@ -1,4 +1,10 @@
+DONE-whats wrong with PT.identifier o__o
+  -it was because of infinite loop in Arbitrary instance oops
+DONE-fixed rules:
+  DONE-seems to parse an [] for some reason
+  DONE-multi patterns can not span accross more than 1 line
 -fix orientation abs/rel nonsense?
+-expression parsers can read maps directly out of parsec state -__-
 -add plus operator to rule expr (parse_RuleGroup)
 -add late rule support
 -add commands
