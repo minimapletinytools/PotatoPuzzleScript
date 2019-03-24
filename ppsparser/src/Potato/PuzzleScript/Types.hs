@@ -169,11 +169,11 @@ showPattern_ (Pattern_Bin op p1 p2) = show p1 ++ " " ++ show op ++ " " ++ showPa
 instance Show Pattern where
   show p = "[ " ++ showPattern_ p ++ " ]"
 
-newtype Patterns = Patterns [Pattern] deriving (Show)
+newtype Patterns = Patterns [Pattern]
 
---instance Show Patterns where
-  --show (Patterns []) = ""
-  --show (Patterns (x:xs)) = show x ++ " " ++ show xs
+instance Show Patterns where
+  show (Patterns []) = ""
+  show (Patterns (x:xs)) = show x ++ " " ++ show xs
 
 indentOnce :: String -> String
 indentOnce = concat . map ("    " ++) . lines
