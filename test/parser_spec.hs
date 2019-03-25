@@ -6,6 +6,7 @@ import Potato.PuzzleScript.ExpressionParsers
 
 import Text.Parsec
 
+import Control.Monad
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Data.List (nub, intersperse)
@@ -54,11 +55,19 @@ defaultOutput = emptyOutput {
   }
 
 
-instance Arbitrary ROrientation where
+newtype KnownROrientation = KnownROrientation ROrientation
+instance Arbitrary KnownROrientation where
   arbitrary = do
     absorrel <- elements [Abs, Rel]
     orient <- elements $ Map.keys knownOrientations
-    return $ absorrel orient
+    return $ KnownROrientation $ absorrel orient
+
+newtype KnownRVelocity = KnownRVelocity RVelocity
+instance Arbitrary KnownRVelocity where
+  arbitrary = do
+    absorrel <- elements [Abs, Rel]
+    vel <- elements $ Map.keys knownVelocities
+    return $ KnownRVelocity $ absorrel vel
 
 newtype KnownObject = KnownObject Object deriving(Show)
 instance Arbitrary KnownObject where
@@ -68,7 +77,7 @@ instance Arbitrary SingleObject where
   arbitrary = oneof $ [elements defaultObjects >>= return . SingleObject,
     do
       KnownObject obj <- arbitrary
-      orient <- arbitrary
+      KnownROrientation orient <- arbitrary
       return $ SingleObject_Orientation orient obj]
 
 instance Arbitrary ObjectExpr where
@@ -87,17 +96,46 @@ prop_parseObject (KnownObject obj) = case runParser parse_Object defaultOutput "
   Left err -> trace (show err) $ False
   Right x -> obj == x
 
-prop_parseObjectExpr :: ObjectExpr -> Bool
-prop_parseObjectExpr expr = case runParser parse_ObjectExpr defaultOutput "(test)" (T.pack $ show expr) of
+prop_parse_ObjectExpr :: ObjectExpr -> Bool
+prop_parse_ObjectExpr expr = case runParser parse_ObjectExpr defaultOutput "(test)" (T.pack $ show expr) of
   Left err -> trace (show err) $ False
   Right x -> expr == x
   --Right x -> trace (show expr ++ " =? " ++ show x) $ expr == x
 
 
+instance Arbitrary PatternObj where
+  arbitrary = oneof $ [arbitrary >>= return . PatternObject,
+    do
+      obj <- arbitrary
+      KnownRVelocity vel <- arbitrary
+      return $ PatternObject_Velocity vel obj]
+
+instance Arbitrary Pattern where
+  arbitrary = sized arbSized_Pattern where
+    arbSized_Pattern :: Int -> Gen Pattern
+    arbSized_Pattern 0 = arbitrary >>= return . Pattern_PatternObj
+    arbSized_Pattern n = do
+      obj <- arbitrary
+      pat <- arbSized_Pattern (n-1)
+      return $ Pattern_Bin Pipe obj pat
+
+instance Arbitrary Patterns where
+  arbitrary = do
+    size <- getSize
+    -- TODO better size distribution
+    splits <- choose (1,3)
+    pats <- replicateM splits (resize (size `div` splits) arbitrary)
+    sublistOf pats >>= return . Patterns
+
+prop_parse_Pattern :: Patterns -> Bool
+prop_parse_Pattern pat = case runParser parse_Patterns defaultOutput "(test)" (T.pack $ show pat) of
+  Left err -> trace (show err) $ False
+  Right x -> pat == x
 
 
 
 
+-- ugly old tests for legend expression and collision layers, please update with new ones
 newtype KnownObjects = KnownObjects [String] deriving (Show)
 instance Arbitrary KnownObjects where
   arbitrary = KnownObjects <$>
@@ -138,6 +176,8 @@ prop_parseCollisionLayers objects = monadicIO $ do
     Right _ -> True
 
 
+
+-- test the full parser on a file
 prop_parseFile_pass_1 :: Property
 prop_parseFile_pass_1 = monadicIO $ assert =<< (run $ do
   text1 <- T.readFile "test.txt"
@@ -145,21 +185,6 @@ prop_parseFile_pass_1 = monadicIO $ assert =<< (run $ do
   case runParser potatoParse emptyOutput "(unknown)" text1 of
     Left x -> return False
     Right _ -> return True)
-
--- TODO test for duplicate legend keys when it's supported
-
-{-
-prop_isWinCondition :: Property
-prop_isWinCondition = monadicIO $ do
-  assert . isWinCondition $ UnExpr Some (ObjectExpr anObject)
-  assert . isWinCondition $ BinExpr On (UnExpr Some (ObjectExpr anObject)) (ObjectExpr anObject)
-  assert . not . isWinCondition $ ObjectExpr anObject
-  assert . not . isWinCondition $ BinExpr On (ObjectExpr anObject) (ObjectExpr anObject)
--}
-
--- TODO
---prop_parseWinConditions :: [(KnownObjects, KnownObjects)] -> Bool
---prop_parseWinConditions pairs = pass where
 
 --Template haskell nonsense to run all properties prefixed with "prop_" in this file
 return []

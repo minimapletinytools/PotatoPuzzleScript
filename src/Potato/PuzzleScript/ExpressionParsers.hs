@@ -6,8 +6,11 @@ module Potato.PuzzleScript.ExpressionParsers (
   parse_ObjectExpr,
   parse_LegendExpr,
   parse_WinCond,
-  parse_Rule
+  parse_Rule,
 
+  -- exported for unit tests
+  -- TODO remove
+  parse_Patterns
 
 ) where
 
@@ -178,7 +181,7 @@ parse_Pattern = PT.brackets $ do
   return $ foldr (\(op, p) acc -> (\p' -> Pattern_Bin op p' (acc p))) Pattern_PatternObj rest $ first
 
 parse_Patterns :: PotatoParser Patterns
-parse_Patterns = sepBy parse_Pattern (oneOf " \t") >>= return . Patterns
+parse_Patterns = sepBy parse_Pattern (many $ oneOf " \t") >>= return . Patterns
 
 parse_RuleBinOp :: PotatoParser RuleBinOp
 parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
