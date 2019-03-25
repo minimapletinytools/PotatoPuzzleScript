@@ -5,7 +5,7 @@ module Potato.PuzzleScript.ExpressionParsers (
   parse_SingleObject,
   parse_ObjectExpr,
   parse_LegendExpr,
-  parse_WinCond,
+  parse_WinCondExpr,
   parse_Rule,
 
   -- exported for unit tests
@@ -140,21 +140,21 @@ parse_WinUnOp =
 parse_WinBinOp :: PotatoParser WinBinOp
 parse_WinBinOp = PT.reservedOp "on" >> return Win_On
 
-parse_BasicWinCond :: PotatoParser BasicWinCond
-parse_BasicWinCond = do
+parse_BasicWinCondExpr :: PotatoParser BasicWinCondExpr
+parse_BasicWinCondExpr = do
   op <- parse_WinUnOp
   obj <- parse_SingleObject
-  return $ BasicWinCond op obj
+  return $ BasicWinCondExpr op obj
 
-parse_WinCondBinOp :: PotatoParser WinCond
-parse_WinCondBinOp = do
-  exp1 <- parse_BasicWinCond
+parse_WinCondExprBinOp :: PotatoParser WinCondExpr
+parse_WinCondExprBinOp = do
+  exp1 <- parse_BasicWinCondExpr
   op <- parse_WinBinOp
   exp2 <- parse_SingleObject
-  return $ WinCond_Bin op exp1 exp2
+  return $ WinCondExpr_Bin op exp1 exp2
 
-parse_WinCond :: PotatoParser WinCond
-parse_WinCond = try parse_WinCondBinOp <|> (parse_BasicWinCond >>= return . WinCond_Basic)
+parse_WinCondExpr :: PotatoParser WinCondExpr
+parse_WinCondExpr = try parse_WinCondExprBinOp <|> (parse_BasicWinCondExpr >>= return . WinCondExpr_Basic)
 
 parse_PatBinOp :: PotatoParser PatBinOp
 parse_PatBinOp = do PT.reservedOp "|" >> return Pipe

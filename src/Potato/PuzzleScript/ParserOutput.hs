@@ -28,7 +28,7 @@ data Output = Output {
     _collisionLayers :: [[Object]],
     --list of loops of groups of rules
     _rules :: [Rule],
-    _winConditions :: [WinCond],
+    _winConditions :: [WinCondExpr],
     _levels :: [Level]
 }
 

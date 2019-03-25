@@ -1,4 +1,6 @@
 DONE-expression parsers can read maps directly out of parsec state -__-
+-split out ExpressionParsers property tests into their own file
+  -just delete the bad unit tests in parsec_spec...
 -fix orientation abs/rel nonsense?
 -more unit tests
 -add + operator to rule expr (parse_RuleGroup)

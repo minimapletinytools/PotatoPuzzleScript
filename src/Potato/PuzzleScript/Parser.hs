@@ -113,12 +113,12 @@ parseRules = do
   modifyState (set rules r)
   return ()
 
-parseWinConditions :: PotatoParser ()
-parseWinConditions = do
+parseWinCondExpritions :: PotatoParser ()
+parseWinCondExpritions = do
   PT.whiteSpace
   manyTillHeaderOrEoF $ do
     -- parse each layer as comma separated objects
-    r <- parse_WinCond
+    r <- parse_WinCondExpr
     modifyState (over winConditions (r:))
     PT.whiteSpace
   return ()
@@ -204,7 +204,7 @@ parseSections = do
     , (parseHeader SOUNDS, parseSounds)
     , (parseHeader COLLISIONLAYERS, parseCollisionLayers)
     , (parseHeader RULES, parseRules)
-    , (parseHeader WINCONDITIONS, parseWinConditions)
+    , (parseHeader WINCONDITIONS, parseWinCondExpritions)
     , (parseHeader LEVELS, parseLevels)
     ]
   PT.whiteSpace

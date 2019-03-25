@@ -154,6 +154,6 @@ winConditionExpr lm = (try $ do
   let
     termParser lm' = parens (winConditionExpr lm) <|> objTermKnown lm
   expr <- buildExpressionParser winConditionsExprOperators (termParser lm)
-  guard $ isWinCondition expr
+  guard $ isWinCondExprition expr
   return expr) <?> "valid win condition expression"
 -}

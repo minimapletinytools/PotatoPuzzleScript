@@ -36,8 +36,8 @@ module Potato.PuzzleScript.Types (
 
   WinUnOp(..),
   WinBinOp(..),
-  BasicWinCond(..),
-  WinCond(..),
+  BasicWinCondExpr(..),
+  WinCondExpr(..),
 
   PatBinOp(..),
   PatternObj(..),
@@ -53,7 +53,7 @@ module Potato.PuzzleScript.Types (
   --isObjBinOn,
   --isSingleObject,
   --isPatternObject,
-  --isWinCondition
+  --isWinCondExprition
 ) where
 
 import Potato.Math.Integral.TR
@@ -151,15 +151,14 @@ data WinBinOp = Win_On deriving(Eq)
 instance Show WinBinOp where
   show Win_On = "on"
 
-data BasicWinCond = BasicWinCond WinUnOp SingleObject deriving(Eq)
-instance Show BasicWinCond where
-  show (BasicWinCond op obj) = show op ++ " " ++ show obj
+data BasicWinCondExpr = BasicWinCondExpr WinUnOp SingleObject deriving(Eq)
+instance Show BasicWinCondExpr where
+  show (BasicWinCondExpr op obj) = show op ++ " " ++ show obj
 
--- TODO rename to WinCondExpr
-data WinCond = WinCond_Basic BasicWinCond | WinCond_Bin WinBinOp BasicWinCond SingleObject deriving(Eq)
-instance Show WinCond where
-  show (WinCond_Basic bwc) = show bwc
-  show (WinCond_Bin op bwc obj) = show bwc ++ " " ++ show op ++ " " ++ show obj
+data WinCondExpr = WinCondExpr_Basic BasicWinCondExpr | WinCondExpr_Bin WinBinOp BasicWinCondExpr SingleObject deriving(Eq)
+instance Show WinCondExpr where
+  show (WinCondExpr_Basic bwc) = show bwc
+  show (WinCondExpr_Bin op bwc obj) = show bwc ++ " " ++ show op ++ " " ++ show obj
 
 
 data PatBinOp = Pipe deriving(Eq)
@@ -296,20 +295,20 @@ isRule (ScopedRuleExpr _ (BinExpr Arrow a b)) = isPattern a && (isRule b || isPa
 isRule (BinExpr Arrow a b) = isBoolean a && isRule b
 
 
--- | isBasicWinCondition returns true if the expression is a valid basic win condition expression
--- BasicWinCondition = All/No/Some SingleObject
-isBasicWinCondition :: Expr -> Bool
-isBasicWinCondition (UnExpr All _) = True
-isBasicWinCondition (UnExpr No _) = True
-isBasicWinCondition (UnExpr Some _) = True
-isBasicWinCondition _ = False
+-- | isBasicWinCondExprition returns true if the expression is a valid basic win condition expression
+-- BasicWinCondExprition = All/No/Some SingleObject
+isBasicWinCondExprition :: Expr -> Bool
+isBasicWinCondExprition (UnExpr All _) = True
+isBasicWinCondExprition (UnExpr No _) = True
+isBasicWinCondExprition (UnExpr Some _) = True
+isBasicWinCondExprition _ = False
 
--- | isWinCondition returns true if the expression is a valid win condition expression
--- WinCondition = BasicWinCondition | BasicWinCondition On SingleObject
+-- | isWinCondExprition returns true if the expression is a valid win condition expression
+-- WinCondExprition = BasicWinCondExprition | BasicWinCondExprition On SingleObject
 -- a valid win condition expressions are limited see https://www.puzzlescript.net/Documentation/winconditions.html
 -- for complex win conditions, use rules instead
-isWinCondition :: Expr -> Bool
-isWinCondition (BinExpr On x (ObjectExpr _)) = isBasicWinCondition x
-isWinCondition x = isBasicWinCondition x
+isWinCondExprition :: Expr -> Bool
+isWinCondExprition (BinExpr On x (ObjectExpr _)) = isBasicWinCondExprition x
+isWinCondExprition x = isBasicWinCondExprition x
 
 -}

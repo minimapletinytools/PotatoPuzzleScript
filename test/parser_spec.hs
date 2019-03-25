@@ -111,17 +111,17 @@ prop_parse_ObjectExpr expr = case runParser parse_ObjectExpr defaultOutput "(tes
 --    <*> listOf arbitrary)
 
 
-instance Arbitrary BasicWinCond where
+instance Arbitrary BasicWinCondExpr where
   arbitrary = do
     op <- elements [Win_All, Win_Some, Win_No]
-    BasicWinCond op <$> arbitrary
+    BasicWinCondExpr op <$> arbitrary
 
-instance Arbitrary WinCond where
-  arbitrary = oneof $ [WinCond_Basic <$> arbitrary,
-    WinCond_Bin Win_On <$> arbitrary <*> arbitrary]
+instance Arbitrary WinCondExpr where
+  arbitrary = oneof $ [WinCondExpr_Basic <$> arbitrary,
+    WinCondExpr_Bin Win_On <$> arbitrary <*> arbitrary]
 
-prop_parse_WinCond :: WinCond -> Bool
-prop_parse_WinCond expr = case runParser parse_WinCond defaultOutput "(test)" (T.pack $ show expr) of
+prop_parse_WinCondExpr :: WinCondExpr -> Bool
+prop_parse_WinCondExpr expr = case runParser parse_WinCondExpr defaultOutput "(test)" (T.pack $ show expr) of
   Left err -> trace (show err) $ False
   Right x -> expr == x
 
