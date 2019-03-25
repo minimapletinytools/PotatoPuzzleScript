@@ -54,6 +54,8 @@ defaultOutput = emptyOutput {
     _objectList = defaultObjectMap
   }
 
+legendKeys :: [Char]
+legendKeys = ['a'..'z']
 
 newtype KnownROrientation = KnownROrientation ROrientation
 instance Arbitrary KnownROrientation where
@@ -71,10 +73,10 @@ instance Arbitrary KnownRVelocity where
 
 newtype KnownObject = KnownObject Object deriving(Show)
 instance Arbitrary KnownObject where
-  arbitrary = elements defaultObjects >>= return . KnownObject
+  arbitrary = KnownObject <$> elements defaultObjects
 
 instance Arbitrary SingleObject where
-  arbitrary = oneof $ [elements defaultObjects >>= return . SingleObject,
+  arbitrary = oneof $ [SingleObject <$> elements defaultObjects,
     do
       KnownObject obj <- arbitrary
       KnownROrientation orient <- arbitrary
@@ -83,7 +85,7 @@ instance Arbitrary SingleObject where
 instance Arbitrary ObjectExpr where
   arbitrary = sized arbSized_ObjectExpr where
     arbSized_ObjectExpr :: Int -> Gen ObjectExpr
-    arbSized_ObjectExpr 0 = arbitrary >>= return . ObjectExpr_Single
+    arbSized_ObjectExpr 0 = ObjectExpr_Single <$> arbitrary
     arbSized_ObjectExpr n = do
       split <- choose (0,n-1)
       l <- arbSized_ObjectExpr split
@@ -102,9 +104,14 @@ prop_parse_ObjectExpr expr = case runParser parse_ObjectExpr defaultOutput "(tes
   Right x -> expr == x
   --Right x -> trace (show expr ++ " =? " ++ show x) $ expr == x
 
+--newtype LegendExprs = LegendExprs [LegendExpr]
+--instance Arbitrary LegendExprs where
+--  arbitrary = LegendExprs <$>
+--    (zipWith (\k v -> LegendExpr k v) <$> (listOf . elements $ legendKeys) `suchThat` hasNoDups
+--    <*> listOf arbitrary)
 
 instance Arbitrary PatternObj where
-  arbitrary = oneof $ [arbitrary >>= return . PatternObject,
+  arbitrary = oneof $ [PatternObject <$> arbitrary,
     do
       obj <- arbitrary
       KnownRVelocity vel <- arbitrary
@@ -113,7 +120,7 @@ instance Arbitrary PatternObj where
 instance Arbitrary Pattern where
   arbitrary = sized arbSized_Pattern where
     arbSized_Pattern :: Int -> Gen Pattern
-    arbSized_Pattern 0 = arbitrary >>= return . Pattern_PatternObj
+    arbSized_Pattern 0 = Pattern_PatternObj <$> arbitrary
     arbSized_Pattern n = do
       obj <- arbitrary
       pat <- arbSized_Pattern (n-1)
@@ -127,10 +134,19 @@ instance Arbitrary Patterns where
     pats <- replicateM splits (resize (size `div` splits) arbitrary)
     sublistOf pats >>= return . Patterns
 
-prop_parse_Pattern :: Patterns -> Bool
-prop_parse_Pattern pat = case runParser parse_Patterns defaultOutput "(test)" (T.pack $ show pat) of
+prop_parse_Patterns :: Patterns -> Bool
+prop_parse_Patterns pat = case runParser parse_Patterns defaultOutput "(test)" (T.pack $ show pat) of
   Left err -> trace (show err) $ False
   Right x -> pat == x
+
+
+
+
+
+
+
+
+
 
 
 
@@ -141,8 +157,7 @@ instance Arbitrary KnownObjects where
   arbitrary = KnownObjects <$>
     (listOf . elements $ defaultObjects) `suchThat` hasNoDups
 
-legendKeys :: [Char]
-legendKeys = ['a'..'z']
+
 newtype LegendTuples = LegendTuples [(Char,String)] deriving (Show)
 
 instance Arbitrary LegendTuples where
