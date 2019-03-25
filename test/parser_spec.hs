@@ -22,6 +22,19 @@ import Test.QuickCheck.Monadic
 
 import Debug.Trace (trace)
 
+splitSizeAndReduce_ :: Int -> Gen (Int, Int)
+splitSizeAndReduce_ n = do
+  x <- choose (0,n-1)
+  return (x, n-x-1)
+
+splitSizeAndReduce :: Gen (Int, Int)
+splitSizeAndReduce = getSize >>= splitSizeAndReduce_
+
+splitSize :: Gen (Int, Int)
+splitSize = do
+  n <- getSize
+  x <- choose (0,n)
+  return (x, n-x)
 
 -- cnp https://stackoverflow.com/questions/30805230/uniqueness-and-other-restrictions-for-arbitrary-in-quickcheck
 -- | Checks if a given list has no duplicates in _O(n log n)_.
@@ -57,6 +70,25 @@ defaultOutput = emptyOutput {
 legendKeys :: [Char]
 legendKeys = ['a'..'z']
 
+instance Arbitrary KeyboardInput where
+  arbitrary = elements [K_NONE, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_Z, K_X]
+
+instance Arbitrary Boolean where
+  arbitrary = sized arbSized_Boolean where
+    arbSized_Boolean 0 = oneof [
+      --Boolean_Var <$> arbitrary, -- TODO use known boolean vars names I guess?
+      Boolean_Input <$> arbitrary,
+      return Boolean_True,
+      return Boolean_False]
+    arbSized_Boolean n = oneof [
+      Boolean_Not <$> arbSized_Boolean (n-1),
+      do
+        op <- elements [And, Or]
+        (s1, s2) <- splitSizeAndReduce_ n
+        b1 <- arbSized_Boolean s1
+        b2 <- arbSized_Boolean s2
+        return $ Boolean_Bin op b1 b2]
+
 newtype KnownROrientation = KnownROrientation ROrientation
 instance Arbitrary KnownROrientation where
   arbitrary = do
@@ -87,9 +119,9 @@ instance Arbitrary ObjectExpr where
     arbSized_ObjectExpr :: Int -> Gen ObjectExpr
     arbSized_ObjectExpr 0 = ObjectExpr_Single <$> arbitrary
     arbSized_ObjectExpr n = do
-      split <- choose (0,n-1)
-      l <- arbSized_ObjectExpr split
-      r <- arbSized_ObjectExpr (n-split-1)
+      (s1, s2) <- splitSizeAndReduce_ n
+      l <- arbSized_ObjectExpr s1
+      r <- arbSized_ObjectExpr s2
       op <- elements [And_Obj, Or_Obj]
       return $ ObjectExpr_Bin op l r
 
@@ -145,20 +177,41 @@ instance Arbitrary Patterns where
   arbitrary = do
     size <- getSize
     -- TODO better size distribution
-    splits <- choose (1,3)
+    let splits = max 1 . min 3 $ (size `div` 3)
     pats <- replicateM splits (resize (size `div` splits) arbitrary)
-    sublistOf pats >>= return . Patterns
+    return $ Patterns pats
 
-prop_parse_Patterns :: Patterns -> Bool
-prop_parse_Patterns pat = case runParser parse_Patterns defaultOutput "(test)" (T.pack $ show pat) of
+instance Arbitrary UnscopedRule where
+  arbitrary = oneof [
+    do
+      size <- getSize
+      p1 <- resize size arbitrary
+      p2 <- resize size arbitrary
+      return $ UnscopedRule_Patterns p1 p2
+    , do
+      (s1, s2) <- splitSize
+      pats <- resize s1 arbitrary
+      rule <- resize s2 arbitrary
+      return $ UnscopedRule_Rule pats rule]
+
+      -- TODO put back when you have boolean input support
+    {-, do
+      (s1, s2) <- splitSize
+      b <- resize s1 arbitrary
+      rule <- resize s2 arbitrary
+      return $ UnscopedRule_Boolean b rule]-}
+
+instance Arbitrary Rule where
+  arbitrary = sized arbSized_Rule where
+    arbSized_Rule 0 = return $ Rule_Command "TODOREPLACEMEWITHAREALCOMMAND"
+    arbSized_Rule n = oneof [Rule <$> resize (n-1) arbitrary,
+      Rule_Scoped <$> elements (Map.keys knownVelocities) <*> resize (n-1) arbitrary]
+
+
+prop_parse_Rule :: Rule -> Bool
+prop_parse_Rule rule = case runParser parse_Rule defaultOutput "(test)" (T.pack $ show rule) of
   Left err -> trace (show err) $ False
-  Right x -> pat == x
-
-
-
-
-
-
+  Right x -> rule == x
 
 
 

@@ -160,7 +160,6 @@ instance Show WinCondExpr where
   show (WinCondExpr_Basic bwc) = show bwc
   show (WinCondExpr_Bin op bwc obj) = show bwc ++ " " ++ show op ++ " " ++ show obj
 
-
 data PatBinOp = Pipe deriving(Eq)
 instance Show PatBinOp where
   show Pipe = "|"
@@ -200,9 +199,9 @@ instance Show UnscopedRule where
 
 data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Eq)
 instance Show Rule where
-  show (Rule_Command c) = show c
+  show (Rule_Command c) = c
   show (Rule r) = show r
-  show (Rule_Scoped vel r) = show vel ++ " " ++ show r
+  show (Rule_Scoped vel r) = vel ++ " " ++ show r
 
 
 

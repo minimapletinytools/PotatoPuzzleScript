@@ -6,11 +6,7 @@ module Potato.PuzzleScript.ExpressionParsers (
   parse_ObjectExpr,
   parse_LegendExpr,
   parse_WinCondExpr,
-  parse_Rule,
-
-  -- exported for unit tests
-  -- TODO remove
-  parse_Patterns
+  parse_Rule
 
 ) where
 
@@ -56,11 +52,8 @@ parse_Boolean = buildExpressionParser opTable_Boolean parse_Boolean_Term <?> "Bo
 
 parse_Command :: PotatoParser Command
 parse_Command = do
-  -- TODO don't fail
-  fail "no command support yet"
-  -- TODO reserved
-  name <- PT.identifier
-  -- TODO check command is valid
+  name <- string "TODOREPLACEMEWITHAREALCOMMAND"
+  -- TODO
   --guardError (Map.member name om) ("unknown object " ++ name)
   return name
 
