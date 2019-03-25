@@ -110,6 +110,21 @@ prop_parse_ObjectExpr expr = case runParser parse_ObjectExpr defaultOutput "(tes
 --    (zipWith (\k v -> LegendExpr k v) <$> (listOf . elements $ legendKeys) `suchThat` hasNoDups
 --    <*> listOf arbitrary)
 
+
+instance Arbitrary BasicWinCond where
+  arbitrary = do
+    op <- elements [Win_All, Win_Some, Win_No]
+    BasicWinCond op <$> arbitrary
+
+instance Arbitrary WinCond where
+  arbitrary = oneof $ [WinCond_Basic <$> arbitrary,
+    WinCond_Bin Win_On <$> arbitrary <*> arbitrary]
+
+prop_parse_WinCond :: WinCond -> Bool
+prop_parse_WinCond expr = case runParser parse_WinCond defaultOutput "(test)" (T.pack $ show expr) of
+  Left err -> trace (show err) $ False
+  Right x -> expr == x
+
 instance Arbitrary PatternObj where
   arbitrary = oneof $ [PatternObject <$> arbitrary,
     do
