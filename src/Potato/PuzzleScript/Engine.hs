@@ -45,10 +45,10 @@ emptyExecutionCtx = ExecutionCtx {
 
 
 objectExprToEntry :: ObjectExpr -> Entry
-objectExprToEntry (ObjectExpr_Single (SingleObject obj)) = [(undefined, obj)]
-objectExprToEntry (ObjectExpr_Single (SingleObject_Orientation (orient) obj)) = [(orient', obj)] where
-  orient' = undefined
-  --orient' = fromJust (makeRotation knownOrientations orient)
+objectExprToEntry (ObjectExpr_Single (SingleObject obj)) = [(zeroRotation, obj)]
+objectExprToEntry (ObjectExpr_Single (SingleObject_Orientation (orient) obj)) = [(orient'', obj)] where
+  orient' = fromMaybe (RRotation Default zeroRotation) (makeRotation knownOrientations orient)
+  orient'' = flattenRRotation identity orient'
 objectExprToEntry (ObjectExpr_Bin And_Obj exp1 exp2) = objectExprToEntry exp1 ++ objectExprToEntry exp2
 objectExprToEntry _ = error "or not allowed"
 
