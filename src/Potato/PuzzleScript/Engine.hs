@@ -1,5 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+-- TODO remove these when development is done
+{-# OPTIONS_GHC -fno-warn-unused-top-binds #-}
+{-# OPTIONS_GHC -fno-warn-unused-matches #-}
+
+
 module Potato.PuzzleScript.Engine (
   Point,
   Entry,

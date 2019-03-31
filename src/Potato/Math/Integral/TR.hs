@@ -21,7 +21,11 @@ module Potato.Math.Integral.TR
   , Rotation
   , zeroRotation
   , TR(..)
+  , rotation, translation
   , identity
+  , axisX
+  , axisY
+  , axisZ
   , toM44
   , transformV4
   , transformV3
@@ -33,7 +37,6 @@ module Potato.Math.Integral.TR
 import Lens.Micro.Platform
 import Control.DeepSeq
 import GHC.Generics (Generic)
-import Linear.Conjugate
 import qualified Linear.Matrix as M
 import Linear.V3
 import Linear.V4

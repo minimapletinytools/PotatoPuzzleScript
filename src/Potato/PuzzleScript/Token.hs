@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 
 module Potato.PuzzleScript.Token(
   identifier,
@@ -24,10 +25,8 @@ import Potato.PuzzleScript.Types
 import Potato.PuzzleScript.ParserOutput
 import Text.Parsec
 import Control.Monad.Identity
-import qualified Data.Map as Map
 import qualified Data.Text as T
 import qualified Text.Parsec.Token as Token
-import Text.Parsec.Expr
 
 
 emptyDef :: Token.GenLanguageDef T.Text Output Identity

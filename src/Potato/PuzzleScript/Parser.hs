@@ -125,16 +125,16 @@ parseWinCondExpritions = do
 
 
 
-tryFirstThen :: Stream s m t => ParsecT s u m a -> ParsecT s u m b -> ParsecT s u m b
-tryFirstThen a b = try (a >> b) <|> b
+--tryFirstThen :: ParsecT s u m a -> ParsecT s u m b -> ParsecT s u m b
+--tryFirstThen a b = try (a >> b) <|> b
 
 parseLevelSlice :: PotatoParser ((Int,Int), LevelSlice)
 parseLevelSlice = do
   state <- getState
   let
-    legend = _legend state
+    legend' = _legend state
     parseLevelLine = do
-      r <- many1 (oneOf (Map.keys legend))
+      r <- many1 (oneOf (Map.keys legend'))
       many (oneOf " \t") >> endOfLine
       return r
   slices <- manyTill parseLevelLine (try (void endOfLine) <|> lookAhead eof) >>= return . reverse

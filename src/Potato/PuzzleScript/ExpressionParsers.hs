@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module Potato.PuzzleScript.ExpressionParsers (
   parse_Object,
@@ -10,7 +11,6 @@ module Potato.PuzzleScript.ExpressionParsers (
 
 ) where
 
-import Potato.Math.Integral.TR
 import Potato.PuzzleScript.Types
 import qualified Potato.PuzzleScript.Token as PT
 import Potato.PuzzleScript.ParserOutput

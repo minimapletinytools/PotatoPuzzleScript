@@ -52,7 +52,6 @@ module Potato.PuzzleScript.Types (
   Patterns(..),
 
   RuleBinOp(..),
-  Command,
   UnscopedRule(..),
   Rule(..),
 
@@ -67,10 +66,7 @@ import Potato.Math.Integral.TR
 import qualified Linear.Matrix as M
 
 import qualified Data.Map as Map
-import Text.Parsec
 import qualified Data.Vector.Unboxed as U
-
-import Lens.Micro.Platform
 
 data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITIONS | LEVELS deriving (Read, Show, Enum)
 allHeaders :: [Header]

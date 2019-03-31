@@ -2,7 +2,7 @@
 
 module Potato.PuzzleScript.ParserOutput (
   Output(..),
-  title, author, homepage, headers, objectList, legend, collisionLayers, rules, winConditions, levels,
+  title, author, homepage, headers, objectList, legend, collisionLayers, rules, winConditions, levels, velocityList,
   emptyOutput,
   findBackgroundKey,
   PotatoParser
