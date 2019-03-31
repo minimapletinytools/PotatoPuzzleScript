@@ -70,6 +70,9 @@ defaultOutput = emptyOutput {
 legendKeys :: [Char]
 legendKeys = ['a'..'z']
 
+
+-- ExpressionParser tests
+
 instance Arbitrary KeyboardInput where
   arbitrary = elements [K_NONE, K_LEFT, K_RIGHT, K_DOWN, K_UP, K_Z, K_X]
 
@@ -92,16 +95,16 @@ instance Arbitrary Boolean where
 newtype KnownROrientation = KnownROrientation ROrientation
 instance Arbitrary KnownROrientation where
   arbitrary = do
-    absorrel <- elements [Abs, Rel]
+    absorrel <- elements [Abs, Rel, Default]
     orient <- elements $ Map.keys knownOrientations
-    return $ KnownROrientation $ absorrel orient
+    return $ KnownROrientation $ SpaceModifiedString absorrel orient
 
 newtype KnownRVelocity = KnownRVelocity RVelocity
 instance Arbitrary KnownRVelocity where
   arbitrary = do
-    absorrel <- elements [Abs, Rel]
+    absorrel <- elements [Abs, Rel, Default]
     vel <- elements $ Map.keys knownVelocities
-    return $ KnownRVelocity $ absorrel vel
+    return $ KnownRVelocity $ SpaceModifiedString absorrel vel
 
 newtype KnownObject = KnownObject Object deriving(Show)
 instance Arbitrary KnownObject where
@@ -219,15 +222,25 @@ prop_parse_Rule rule = case runParser parse_Rule defaultOutput "(test)" (T.pack 
 
 
 
--- ugly old tests for legend expression and collision layers, please update with new ones
+-- Parser tests
 newtype KnownObjects = KnownObjects [String] deriving (Show)
 instance Arbitrary KnownObjects where
   arbitrary = KnownObjects <$>
     (listOf . elements $ defaultObjects) `suchThat` hasNoDups
 
+prop_parseCollisionLayers :: [KnownObjects] -> Property
+prop_parseCollisionLayers objects = monadicIO $ do
+  let
+    objectStrings :: [[String]] = map (\(KnownObjects x) -> x) objects
+    interspersedCommas :: [[String]] = map (intersperse ", ") objectStrings
+    interspersedLines :: [[String]] = intersperse ["\n"] interspersedCommas
+    text = decodeUtf8 . B.toStrict . toLazyByteString . stringUtf8 . concat . concat $ interspersedLines
+  assert $ case runParser (parseCollisionLayers >> getState) defaultOutput "(test)" text of
+    Left x -> False
+    -- TODO check output matches input
+    Right _ -> True
 
 newtype LegendTuples = LegendTuples [(Char,String)] deriving (Show)
-
 instance Arbitrary LegendTuples where
   arbitrary = LegendTuples <$>
     (zip <$> (listOf . elements $ legendKeys) `suchThat` hasNoDups
@@ -245,20 +258,6 @@ prop_parseLegend_pass (LegendTuples tuples) = pass where
 
 prop_parseLegend_fail :: LegendTuples -> Bool
 prop_parseLegend_fail (LegendTuples tuples) = not $ prop_parseLegend_pass (LegendTuples (('*',"thisobjectdoesnotexist"):tuples))
-
-prop_parseCollisionLayers :: [KnownObjects] -> Property
-prop_parseCollisionLayers objects = monadicIO $ do
-  let
-    objectStrings :: [[String]] = map (\(KnownObjects x) -> x) objects
-    interspersedCommas :: [[String]] = map (intersperse ", ") objectStrings
-    interspersedLines :: [[String]] = intersperse ["\n"] interspersedCommas
-    text = decodeUtf8 . B.toStrict . toLazyByteString . stringUtf8 . concat . concat $ interspersedLines
-  assert $ case runParser (parseCollisionLayers >> getState) defaultOutput "(test)" text of
-    Left x -> False
-    -- TODO check output matches input
-    Right _ -> True
-
-
 
 -- test the full parser on a file
 prop_parseFile_pass_1 :: Property

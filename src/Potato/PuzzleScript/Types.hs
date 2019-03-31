@@ -10,12 +10,17 @@ module Potato.PuzzleScript.Types (
 
   KeyboardInput(..),
   allKeyboardInputs,
-  AbsOrRel(..),
+  SpaceModifier(..),
+  SpaceModifiedString(..),
   Object,
   Orientation,
   Velocity,
   ROrientation,
   RVelocity,
+  RRotation(..),
+  RTR(..),
+  flattenRRotation,
+  flattenRTR,
   Command,
   Color,
   LegendKey,
@@ -23,8 +28,10 @@ module Potato.PuzzleScript.Types (
   LegendMap,
   OrientationMap,
   knownOrientations,
+  makeRotation,
   VelocityMap,
   knownVelocities,
+  makeVelocity,
 
   BooleanBinOp(..),
   Boolean(..),
@@ -57,6 +64,7 @@ module Potato.PuzzleScript.Types (
 ) where
 
 import Potato.Math.Integral.TR
+import qualified Linear.Matrix as M
 
 import qualified Data.Map as Map
 import Text.Parsec
@@ -68,34 +76,69 @@ data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITION
 allHeaders :: [Header]
 allHeaders = enumFrom OBJECTS
 
-data AbsOrRel a = Abs a | Rel a deriving (Functor, Eq)
 
-instance Show (AbsOrRel String) where
-  show (Abs x) = "Abs " ++ x
-  show (Rel x) = "Rel " ++ x
+data SpaceModifier = Abs | Rel | Default deriving(Eq, Show)
+combineSpaceModifier :: SpaceModifier -> SpaceModifier -> SpaceModifier
+combineSpaceModifier Abs _ = Abs
+combineSpaceModifier Rel _ = Rel
+combineSpaceModifier Default x = x
+
+data SpaceModifiedString = SpaceModifiedString SpaceModifier String deriving(Eq)
+
+instance Show (SpaceModifiedString) where
+  show (SpaceModifiedString Abs x) = "Abs " ++ x
+  show (SpaceModifiedString Rel x) = "Rel " ++ x
+  show (SpaceModifiedString Default x) = x
 
 type Object = String
 -- TODO make Object var for "..."
+
 type Orientation = String
 type Velocity = String
 
-type ROrientation = AbsOrRel Orientation
-type RVelocity = AbsOrRel Velocity
+type ROrientation = SpaceModifiedString
+type RVelocity = SpaceModifiedString
+
+data RRotation = RRotation SpaceModifier Rotation deriving(Show)
+data RTR = RTR SpaceModifier TR deriving(Show)
+
+-- | flattenRRotation returns RRotations relative to parent (if relative) in global scope
+-- Default means Rel
+flattenRRotation :: TR -> RRotation -> Rotation
+flattenRRotation parent (RRotation sm r) = case sm of
+  Abs -> r
+  _ -> (_rotation parent) M.!*! r
+
+-- | flattenRTR returns RTR relative to parent (if relative) in global scope
+-- Default means Abs
+flattenRTR :: TR -> RTR -> TR
+flattenRTR parent (RTR sm tr) = case sm of
+  Rel -> parent !*! tr
+  _ -> tr
+
 
 type Command = String
 type Color = String
 
+type OrientationMap = Map.Map Orientation RRotation
 
--- TODO these two need to store AbsOrRel type info
--- one idea is to do Map.Map Orientation (AbsOrRel Rotation)
--- and ROrientation Abs/Rel overrides Rotation Abs/Rel when used
-type OrientationMap = Map.Map Orientation Rotation
 knownOrientations :: OrientationMap
-knownOrientations = Map.fromList [("R_FORWARD", zeroRotation)]
+knownOrientations = Map.fromList [("R_FORWARD", RRotation Rel zeroRotation)]
 
-type VelocityMap = Map.Map Velocity TR
+makeRotation :: OrientationMap -> ROrientation -> Maybe (RRotation)
+makeRotation om (SpaceModifiedString osm k) = do
+  RRotation sm r <- Map.lookup k om
+  return $ RRotation (combineSpaceModifier sm osm) r
+
+type VelocityMap = Map.Map Velocity (RTR)
+
 knownVelocities :: VelocityMap
-knownVelocities = Map.fromList [("v", identity),("^", identity),(">", identity),("<", identity)]
+knownVelocities = Map.fromList [("v", RTR Abs identity),("^", RTR Abs identity),(">", RTR Abs identity),("<", RTR Abs identity)]
+
+makeVelocity :: VelocityMap -> RVelocity -> Maybe (RTR)
+makeVelocity om (SpaceModifiedString osm k) = do
+  RTR sm r <- Map.lookup k om
+  return $ RTR (combineSpaceModifier sm osm) r
 
 type ObjectMap = Map.Map Object Color
 type LegendKey = Char

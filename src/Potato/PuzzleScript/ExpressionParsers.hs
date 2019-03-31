@@ -64,17 +64,17 @@ parse_Object = do
   guardError (Map.member name om) ("unknown object " ++ name)
   return name
 
-parse_AbsOrRel :: PotatoParser (a -> AbsOrRel a)
-parse_AbsOrRel = try (PT.symbol "Abs" >> return Abs) <|> try (PT.symbol "Rel" >> return Rel) <|> return Abs
+parse_SpaceModifier :: PotatoParser SpaceModifier
+parse_SpaceModifier = try (PT.symbol "Abs" >> return Abs) <|> try (PT.symbol "Rel" >> return Rel) <|> return Default
 
 parse_Orientation :: PotatoParser Orientation
 parse_Orientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys knownOrientations))
 
 parse_ROrientation :: PotatoParser ROrientation
 parse_ROrientation = do
-  absorrel <- parse_AbsOrRel
+  absorrel <- parse_SpaceModifier
   name <- maybeParens parse_Orientation
-  return $ absorrel name
+  return $ SpaceModifiedString absorrel name
 
 parse_Velocity :: PotatoParser Velocity
 parse_Velocity = do
@@ -86,11 +86,11 @@ parse_Velocity = do
 parse_RVelocity :: PotatoParser RVelocity
 parse_RVelocity = do
   let vm = knownVelocities
-  absorrel <- parse_AbsOrRel
+  absorrel <- parse_SpaceModifier
   let parseVel = PT.identifier <|> PT.operator
   name <- maybeParens parseVel
   guardError (Map.member name vm) ("unknown velocity " ++ name)
-  return $ absorrel name
+  return $ SpaceModifiedString absorrel name
 
 
 parse_SingleObject_Orientation :: PotatoParser SingleObject

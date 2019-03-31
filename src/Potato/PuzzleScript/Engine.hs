@@ -20,7 +20,7 @@ import Data.Maybe
 import Lens.Micro.Platform
 
 type Point = (Int, Int, Int)
-type Entry = [(Orientation, Object)]
+type Entry = [(Rotation, Object)]
 type Vars = Map.Map String Int
 type LevelState = Map.Map Point Entry
 data GameState = GameState {
@@ -45,8 +45,10 @@ emptyExecutionCtx = ExecutionCtx {
 
 
 objectExprToEntry :: ObjectExpr -> Entry
-objectExprToEntry (ObjectExpr_Single (SingleObject obj)) = [("", obj)]
-objectExprToEntry (ObjectExpr_Single (SingleObject_Orientation (Abs orient) obj)) = [(orient, obj)]
+objectExprToEntry (ObjectExpr_Single (SingleObject obj)) = [(undefined, obj)]
+objectExprToEntry (ObjectExpr_Single (SingleObject_Orientation (orient) obj)) = [(orient', obj)] where
+  orient' = undefined
+  --orient' = fromJust (makeRotation knownOrientations orient)
 objectExprToEntry (ObjectExpr_Bin And_Obj exp1 exp2) = objectExprToEntry exp1 ++ objectExprToEntry exp2
 objectExprToEntry _ = error "or not allowed"
 
