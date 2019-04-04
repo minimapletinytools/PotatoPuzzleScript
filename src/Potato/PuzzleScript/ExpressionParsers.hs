@@ -224,13 +224,16 @@ parse_UnscopedRule =
   "UnscopedRule"
 
 parse_RuleModifier :: PotatoParser RuleModifier
-parse_RuleModifier = PT.reserved "LATE" >> return LateRule
+parse_RuleModifier = PT.reserved "Late" >> return LateRule
 
 parse_Rule_Scoped :: PotatoParser Rule
 parse_Rule_Scoped = do
   v <- parse_Velocity
   r <- parse_UnscopedRule
   return $ Rule_Scoped v r
+
+--validate_Rule_Scoped :: Rule_Scoped
+-- TODO check that velocity is Abs
 
 parse_Rule_Modified :: PotatoParser Rule
 parse_Rule_Modified = do
@@ -250,7 +253,9 @@ parse_RulePlus :: PotatoParser ()
 parse_RulePlus = PT.reservedOp "+"
 
 parse_RuleGroup :: PotatoParser RuleGroup
-parse_RuleGroup = sepBy parse_Rule (many $ parse_RulePlus) >>= return . RuleGroup
+-- TODO not sure why whiteSpace is needed. I thought my token parser stuff would remove it 🤷
+-- misses the + sign and then only returns one rule if you don't have the whitespace
+parse_RuleGroup = sepBy parse_Rule (PT.whiteSpace >> parse_RulePlus) >>= return . RuleGroup
 
 
 -- do we support multi nested loops?

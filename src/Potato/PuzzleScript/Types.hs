@@ -230,13 +230,17 @@ indentOnce = concat . map ("    " ++) . lines
 
 data RuleModifier = LateRule deriving(Eq)
 instance Show RuleModifier where
-  show LateRule = "LATE"
+  show LateRule = "Late"
 
 data UnscopedRule = UnscopedRule_Patterns Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule deriving(Eq)
 instance Show UnscopedRule where
   show (UnscopedRule_Patterns p1 p2) = show p1 ++ " -> " ++ show p2
   show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)
   show (UnscopedRule_Boolean b r) = show b ++ " ->\n" ++ indentOnce (show r)
+
+-- TODO need NormalRule then have
+--data Rule = Rule_Normal NormalRule | Rule_Late NormalRule
+--because we don't want late rules inside of rules
 
 data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule | Rule_Modified RuleModifier Rule deriving(Eq)
 instance Show Rule where

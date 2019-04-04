@@ -4,8 +4,12 @@ DONE-split out ExpressionParsers property tests into their own file
 DONE-fix orientation abs/rel nonsense?
 DONE-more unit tests
 -add + operator to rule expr (parse_RuleGroup)
+  -figure out why the whitespace is necessary D:
+  -add to Parsers.hs
 -add late rule support
 -switch non op character operators to use reserved instead of reservedOp
+-add support for horizontal/vertical velocities
+  -probably means adding boolean support to velocities (and figure out how to pattern match LHS/RHS)
 -add commands
   -late?
     -need to understand this better

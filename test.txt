@@ -50,6 +50,7 @@ RULES
 
 [ >  Player | Crate ] -> [  >  Player | > Crate  ]
 [ >  Player | > Crate ] -> [  >  Player | v Crate  ]
+Late [ >  Player | > Crate ] -> [  >  Player | v Crate  ]
 
 ==============
 WINCONDITIONS

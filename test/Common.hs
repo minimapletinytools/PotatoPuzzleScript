@@ -3,6 +3,7 @@
 module Common (
   splitSizeAndReduce,
   splitSize,
+  limitSize,
   hasNoDups,
   defaultObjects,
   defaultObjectMap,
@@ -35,6 +36,11 @@ splitSize = do
   n <- getSize
   x <- choose (0,n)
   return (x, n-x)
+
+limitSize :: Int -> Gen a -> Gen a
+limitSize x gen = do
+  size <- getSize
+  resize (min x size) gen
 
 -- cnp https://stackoverflow.com/questions/30805230/uniqueness-and-other-restrictions-for-arbitrary-in-quickcheck
 -- | Checks if a given list has no duplicates in _O(n log n)_.

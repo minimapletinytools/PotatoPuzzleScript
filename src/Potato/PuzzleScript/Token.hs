@@ -72,7 +72,7 @@ languageDef_ =
                                       --, "v"
 
                                       -- rule modifiers
-                                      , "LATE"
+                                      , "Late"
 
                                       -- commands
                                      ]

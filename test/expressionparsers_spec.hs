@@ -85,6 +85,7 @@ instance Arbitrary UnscopedRule where
       rule <- resize s2 arbitrary
       return $ UnscopedRule_Rule pats rule]
 
+
       -- TODO put back when you have boolean input support
     {-, do
       (s1, s2) <- splitSize
@@ -95,12 +96,22 @@ instance Arbitrary UnscopedRule where
 instance Arbitrary Rule where
   arbitrary = sized arbSized_Rule where
     arbSized_Rule 0 = return $ Rule_Command "TODOREPLACEMEWITHAREALCOMMAND"
-    arbSized_Rule n = oneof [Rule <$> resize (n-1) arbitrary,
+    arbSized_Rule n = limitSize 10 $ oneof [Rule <$> resize (n-1) arbitrary,
+      Rule_Modified LateRule <$> resize (n-1) arbitrary,
       Rule_Scoped <$> elements (Map.keys knownVelocities) <*> resize (n-1) arbitrary]
 
+instance Arbitrary RuleGroup where
+  arbitrary = limitSize 10 $ arbitrary >>= return . RuleGroup
+  --shrink (RuleGroup x) = map RuleGroup (shrink x)
 
-prop_parse_Rule :: Rule -> Bool
+
+{-prop_parse_Rule :: Rule -> Bool
 prop_parse_Rule rule = case runParser parse_Rule defaultOutput "(test)" (T.pack $ show rule) of
+  Left err -> trace (show err) $ False
+  Right x -> rule == x -}
+
+prop_parse_RuleGroup :: RuleGroup -> Bool
+prop_parse_RuleGroup rule = case runParser parse_RuleGroup defaultOutput "(test)" (T.pack $ show rule) of
   Left err -> trace (show err) $ False
   Right x -> rule == x
 
