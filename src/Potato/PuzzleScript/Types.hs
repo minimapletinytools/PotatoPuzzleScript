@@ -65,6 +65,7 @@ module Potato.PuzzleScript.Types (
 import Potato.Math.Integral.TR
 import qualified Linear.Matrix as M
 
+import Data.List (intersperse)
 import qualified Data.Map as Map
 import qualified Data.Vector.Unboxed as U
 
@@ -217,7 +218,7 @@ showPattern_ (Pattern_Bin op p1 p2) = show p1 ++ " " ++ show op ++ " " ++ showPa
 instance Show Pattern where
   show p = "[ " ++ showPattern_ p ++ " ]"
 
-newtype Patterns = Patterns [Pattern] deriving(Eq)
+newtype Patterns = Patterns { unPatterns::[Pattern] } deriving(Eq)
 
 instance Show Patterns where
   show (Patterns []) = ""
@@ -245,10 +246,11 @@ instance Show Rule where
   show (Rule_Command c) = c
   show (Rule r) = show r
   show (Rule_Scoped vel r) = vel ++ " " ++ show r
+  show (Rule_Modified modifier r) = show modifier ++ " " ++ show r
 
-
-
--- TODO RuleGroup [Rule]
+newtype RuleGroup = RuleGroup { unRuleGroup :: [Rule] } deriving(Eq)
+instance Show RuleGroup where
+  show = concat . intersperse " +\n" . map show . unRuleGroup
 
 
 
