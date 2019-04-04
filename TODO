@@ -2,7 +2,6 @@ DONE-expression parsers can read maps directly out of parsec state -__-
 DONE-split out ExpressionParsers property tests into their own file
   IGNORE-just delete the bad unit tests in parsec_spec...
 DONE-fix orientation abs/rel nonsense?
--add support for boolean vars / keyboard input
 DONE-more unit tests
 -add + operator to rule expr (parse_RuleGroup)
 -add late rule support
@@ -18,6 +17,7 @@ DONE-more unit tests
 -add input conditionals
   -engine interface
   DONE-vty hookups
+-add support for boolean vars
 -double check there are trys to all token parsers inside of <|> where needed
 -add sounds
 -potato math

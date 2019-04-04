@@ -65,7 +65,6 @@ initLevelState lm (Level (x,_,_) entries _) = L.ifoldl outfoldfn Map.empty entri
   outfoldfn :: LevelState -> Int -> LevelSlice -> LevelState
   outfoldfn m i e = U.ifoldl (infoldfn i) m e
 
-
 -- orientation of found pattern is always relative to FORWARD so only a position is provided
 findPattern :: ExecutionCtx -> Pattern -> Maybe Translation
 findPattern ctx pattern = undefined

@@ -226,9 +226,13 @@ instance Show Patterns where
 indentOnce :: String -> String
 indentOnce = concat . map ("    " ++) . lines
 
-data RuleBinOp = Arrow deriving(Eq)
+data RuleBinOp = RulePlus deriving(Eq)
 instance Show RuleBinOp where
-  show Arrow = "->"
+  show RulePlus = "+"
+
+data RuleModifier = LateRule deriving(Eq)
+instance Show RuleModifier where
+  show LateRule = "LATE"
 
 data UnscopedRule = UnscopedRule_Patterns Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule deriving(Eq)
 instance Show UnscopedRule where
@@ -236,7 +240,7 @@ instance Show UnscopedRule where
   show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)
   show (UnscopedRule_Boolean b r) = show b ++ " ->\n" ++ indentOnce (show r)
 
-data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Eq)
+data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule | Rule_Modified RuleModifier Rule deriving(Eq)
 instance Show Rule where
   show (Rule_Command c) = c
   show (Rule r) = show r

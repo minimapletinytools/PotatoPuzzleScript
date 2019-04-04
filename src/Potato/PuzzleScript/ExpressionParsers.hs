@@ -38,7 +38,6 @@ parse_Boolean_Input = do
   enum <- choice $ map (\x -> PT.reserved (show x) >> return (show x)) allKeyboardInputs
   return $ Boolean_Input (read enum)
 
--- TODO consider allowing patterns here?
 parse_Boolean_Term :: PotatoParser Boolean
 parse_Boolean_Term =
   PT.parens parse_Boolean <|>
@@ -176,8 +175,8 @@ parse_Pattern = PT.brackets $ do
 parse_Patterns :: PotatoParser Patterns
 parse_Patterns = sepBy parse_Pattern (many $ oneOf " \t") >>= return . Patterns
 
-parse_RuleBinOp :: PotatoParser RuleBinOp
-parse_RuleBinOp = do PT.reservedOp "->" >> return Arrow
+parse_RuleArrow :: PotatoParser ()
+parse_RuleArrow = PT.reservedOp "->"
 
 -- TODO validate same num args
 -- TODO validate elipses are in the same position
@@ -198,14 +197,14 @@ validate_UnscopedRule_Patterns _ = Just "Not a pattern match rule"
 parse_UnscopedRule_Patterns :: PotatoParser UnscopedRule
 parse_UnscopedRule_Patterns = do
   p1 <- parse_Patterns
-  parse_RuleBinOp
+  parse_RuleArrow
   p2 <- parse_Patterns
   return $ UnscopedRule_Patterns p1 p2
 
 parse_UnscopedRule_Rule :: PotatoParser UnscopedRule
 parse_UnscopedRule_Rule = do
   p <- parse_Patterns
-  parse_RuleBinOp
+  parse_RuleArrow
   r <- parse_Rule
   return $ UnscopedRule_Rule p r
 
@@ -213,7 +212,7 @@ parse_UnscopedRule_Rule = do
 parse_UnscopedRule_Boolean :: PotatoParser UnscopedRule
 parse_UnscopedRule_Boolean = do
   p <- parse_Boolean
-  parse_RuleBinOp
+  parse_RuleArrow
   r <- parse_Rule
   return $ UnscopedRule_Boolean p r
 
