@@ -63,12 +63,18 @@ languageDef_ =
                                       , "Some"
                                       , "No"
 
-                                      -- rel orientations
+                                      -- hardcoded rel orientations
 
-                                      -- abs orientations
+                                      -- hardcoded abs orientations
 
+                                      -- hardcoded directional velocities
+                                      -- I got lazy in parse_Velocity, anyways, probably no need to actually reserve these
+                                      --, "v"
 
-                                      -- const directions
+                                      -- rule modifiers
+                                      , "LATE"
+
+                                      -- commands
                                      ]
            , Token.reservedOpNames = [
                                       -- legend ops
@@ -84,6 +90,11 @@ languageDef_ =
 
                                       -- rule ops
                                       , "->"
+                                      , "+"
+
+                                      -- hardcoded directional velocities
+                                      -- I got lazy in parse_Velocity, anyways, probably no need to actually reserve these
+                                      --, "^","<",">"
 
                                       -- win conditions ops
                                       , "All"

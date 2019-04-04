@@ -7,7 +7,8 @@ module Potato.PuzzleScript.ExpressionParsers (
   parse_ObjectExpr,
   parse_LegendExpr,
   parse_WinCondExpr,
-  parse_Rule
+  parse_Rule,
+  parse_RuleGroup
 
 ) where
 
@@ -86,9 +87,7 @@ parse_RVelocity :: PotatoParser RVelocity
 parse_RVelocity = do
   let vm = knownVelocities
   absorrel <- parse_SpaceModifier
-  let parseVel = PT.identifier <|> PT.operator
-  name <- maybeParens parseVel
-  guardError (Map.member name vm) ("unknown velocity " ++ name)
+  name <- maybeParens parse_Velocity
   return $ SpaceModifiedString absorrel name
 
 
@@ -224,20 +223,37 @@ parse_UnscopedRule =
   try parse_UnscopedRule_Patterns <?>
   "UnscopedRule"
 
+parse_RuleModifier :: PotatoParser RuleModifier
+parse_RuleModifier = PT.reserved "LATE" >> return LateRule
+
 parse_Rule_Scoped :: PotatoParser Rule
 parse_Rule_Scoped = do
   v <- parse_Velocity
   r <- parse_UnscopedRule
   return $ Rule_Scoped v r
 
--- do we support multi nested loops?
---parse_Rule_Looped :: LookupMaps -> PotatoParser Rule
---parse_Rule_Looped lm = do
---  rules <- between (PT.reserved "startLoop") (PT.reserved "endLoop") parse_Rule
+parse_Rule_Modified :: PotatoParser Rule
+parse_Rule_Modified = do
+  modifier <- parse_RuleModifier
+  r <- parse_Rule
+  return $ Rule_Modified modifier r
 
 parse_Rule :: PotatoParser Rule
 parse_Rule =
   try parse_Rule_Scoped <|>
+  try parse_Rule_Modified <|>
   try (parse_UnscopedRule >>= return . Rule) <|>
   try (parse_Command >>= return . Rule_Command) <?>
   "Rule"
+
+parse_RulePlus :: PotatoParser ()
+parse_RulePlus = PT.reservedOp "+"
+
+parse_RuleGroup :: PotatoParser RuleGroup
+parse_RuleGroup = sepBy parse_Rule (many $ parse_RulePlus) >>= return . RuleGroup
+
+
+-- do we support multi nested loops?
+--parse_Rule_Looped :: LookupMaps -> PotatoParser Rule
+--parse_Rule_Looped lm = do
+--  rules <- between (PT.reserved "startLoop") (PT.reserved "endLoop") parse_Rule

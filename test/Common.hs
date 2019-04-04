@@ -63,8 +63,9 @@ defaultOutput = emptyOutput {
     _objectList = defaultObjectMap
   }
 
+
 legendKeys :: [Char]
-legendKeys = ['a'..'z']
+legendKeys = ['a'..'u'] ++ ['w'..'z'] -- 'v' is used for velocity 😂
 
 
 -- ExpressionParser tests

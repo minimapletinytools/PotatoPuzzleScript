@@ -5,6 +5,7 @@ DONE-fix orientation abs/rel nonsense?
 DONE-more unit tests
 -add + operator to rule expr (parse_RuleGroup)
 -add late rule support
+-switch non op character operators to use reserved instead of reservedOp
 -add commands
   -late?
     -need to understand this better

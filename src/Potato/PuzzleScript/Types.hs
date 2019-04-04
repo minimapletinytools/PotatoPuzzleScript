@@ -51,9 +51,10 @@ module Potato.PuzzleScript.Types (
   Pattern(..),
   Patterns(..),
 
-  RuleBinOp(..),
+  RuleModifier(..),
   UnscopedRule(..),
   Rule(..),
+  RuleGroup(..)
 
 
   --isObjBinOn,
@@ -226,10 +227,6 @@ instance Show Patterns where
 
 indentOnce :: String -> String
 indentOnce = concat . map ("    " ++) . lines
-
-data RuleBinOp = RulePlus deriving(Eq)
-instance Show RuleBinOp where
-  show RulePlus = "+"
 
 data RuleModifier = LateRule deriving(Eq)
 instance Show RuleModifier where
