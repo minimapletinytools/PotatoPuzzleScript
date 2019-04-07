@@ -21,6 +21,11 @@ module Potato.PuzzleScript.Types (
   RTR(..),
   flattenRRotation,
   flattenRTR,
+  isDirection,
+  listToMatcher,
+  RRotationMatcher,
+  RTRMatcher,
+
   Command,
   Color,
   LegendKey,
@@ -73,7 +78,6 @@ data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | LATE | WINCO
 allHeaders :: [Header]
 allHeaders = enumFrom OBJECTS
 
-
 data SpaceModifier = Abs | Rel | Default deriving(Eq, Show)
 combineSpaceModifier :: SpaceModifier -> SpaceModifier -> SpaceModifier
 combineSpaceModifier Abs _ = Abs
@@ -93,9 +97,13 @@ type Object = String
 type Orientation = String
 type Velocity = String
 
+-- TODO rename to SMOrientation/Velocity
+-- Orientations are relative by default
+-- Velocities are absolute by default
 type ROrientation = SpaceModifiedString
 type RVelocity = SpaceModifiedString
 
+-- TODO rename to SMRotation/TR
 data RRotation = RRotation SpaceModifier Rotation deriving(Show)
 data RTR = RTR SpaceModifier TR deriving(Show)
 
@@ -112,6 +120,25 @@ flattenRTR :: TR -> RTR -> TR
 flattenRTR parent (RTR sm tr) = case sm of
   Rel -> parent !*! tr
   _ -> tr
+
+-- |
+isDirection :: TR -> Bool
+isDirection tr = _translation tr /= zeroTranslation && _rotation tr == zeroRotation
+
+data Matcher_ a = Matcher_ {
+  matcher :: a -> Bool,
+  enumerate :: [a]
+}
+
+listToMatcher :: (Eq a) => [a] -> Matcher_ a
+listToMatcher xs = Matcher_ {
+  matcher = \x -> elem x xs,
+  enumerate = xs
+}
+
+type RRotationMatcher = Matcher_ RRotation
+type RTRMatcher = Matcher_ RTR
+
 
 
 type Command = String
