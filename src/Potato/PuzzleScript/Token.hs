@@ -14,6 +14,7 @@ module Potato.PuzzleScript.Token(
   symbol,
   whiteSpace,
   commaSep,
+  lexeme
 
   --objKnown,
   --objTermKnown,
@@ -125,7 +126,7 @@ semi       = Token.semi       lexer -- parses a semicolon
 symbol = Token.symbol lexer
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
 commaSep = Token.commaSep lexer
-
+lexeme = Token.lexeme lexer
 
 
 --DELETE

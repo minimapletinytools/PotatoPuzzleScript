@@ -1,3 +1,7 @@
+-do brackets test with the lexeme thing
+  -maybe also test out parens/brackets in expression parser. It really should fail...
+-rule parsing can't tell the difference between patterns and pattern followed by a new line
+  -why is this even passing my unit tests?
 -add constants for orientation and velocities
 -add boolean OR support for velocities/orientations
   -allow specifying them in knownvelocities/orientations

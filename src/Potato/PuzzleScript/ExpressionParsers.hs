@@ -243,9 +243,8 @@ parse_RulePlus :: PotatoParser ()
 parse_RulePlus = PT.reservedOp "+"
 
 parse_RuleGroup :: PotatoParser RuleGroup
--- TODO not sure why whiteSpace is needed. I thought my token parser stuff would remove it 🤷
--- misses the + sign and then only returns one rule if you don't have the whitespace
-parse_RuleGroup = sepBy parse_Rule (PT.whiteSpace >> parse_RulePlus) >>= return . RuleGroup
+-- brackets do not have lexeme so we need it here
+parse_RuleGroup = sepBy (PT.lexeme parse_Rule) parse_RulePlus >>= return . RuleGroup
 
 
 -- do we support multi nested loops?
