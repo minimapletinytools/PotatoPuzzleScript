@@ -1,8 +1,8 @@
-# 🥔🧩📜
+# 🥔🧩📜 Spec (WIP)
 
 ### Coordinate System
 
-coordinates or as follows
+Coordinates or as follows
 ```
         +z
         ^   +y
@@ -16,9 +16,91 @@ coordinates or as follows
     v
 ```
 It is only possible to use the +x +y +z octant
-If looking at just x y plane where z = 0, then should be equivalent to Puzzle Script
+If restricted to just x y plane where z = 0, then should be mostly equivalent to Puzzle Script
+
+## Execution Phases
+
+1. input phase: wait until timer or new input
+2. main execution phase: match rules and do replacement
+3. movement update phase: update all moving objects by their velocity if possible (no collisions)
+4. late phase: match all late rules. No movement is allowed in late rules
+
+## Rule Execution
+
+A *rule* is the one of the following:
+
+### command
+Execute the *command*.
+<TODO list commands>
+
+### pattern match with optional modifiers
+If the LHS *patterns* is matched, *replace* with the RHS *patterns*. A LHS *patterns* in a *pattern match* may have an optional *directional modifier*. See Pattern Matching section for more details.
+
+### boolean statement followed by a rule
+A *boolean statement* is either a *patterns* or a *boolean expression* followed by a *rule*. If the pattern is matched or the expression evaluates to true, execute the RHS *rule*. In this case we say the LHS evaluates to true. If it does not, we say the LHS evaluates to false.
+
+A rule is *done* if
+1. it is a *command* that executed once
+2. it is a *pattern match* where the LHS *patterns* matches nothing
+3. it is a *boolean statement* where the *RHS rule* is done or the LHS evaluates to false.
+
+### late modifier
+A *rule* may have an optional *late modifier* indicating that it is run after the main rule execution phase.
+
+## Rule Group Execution
+
+each *rule group* is made of one or more *rules* or *rule groups*
+
+to execute an *rule group*, execute each contained *rule* or *rule group* in order and repeat until all rules are *done*
+
+the currently executing rule group is the *K'th rule group*
+the *rule group* that executed the *K'th rule group* is the *K-1'th rule group*
+
+if the `CANCEL N` command is executed, rollback to the start of execution of the *K-N'th rule group* and continue execution skipping the *cancelled* rule group
 
 
+## Pattern Matching
+
+A *pattern match* has the following structure:
+```
+{DIRECTIONAL MODIFIER} [pattern] {[pattern] ...} -> [pattern] {[pattern] ...}
+```
+### Directional Modifier
+
+Each pattern match may have an optional *directional modifier*. If there is no directional modifier, the default 8 cardinal directions are used. The rule is evaluated once for each direction in the directional modifier. We call the direction a pattern is being matched in the *direction* of the rule.
+
+### Pattern
+
+A *pattern* has the following structure:
+```
+pattern_object {| pattern_object | ...}
+```
+and a *pattern_object* has the following structure:
+```
+{VELOCITY} {ORIENTATION} object
+```
+if no *velocity* is specified the object is not moving
+if no *orientation* is specified, than all orientations are matched.
+
+To match a *pattern*,
+1. find an object matching the first pattern_object relative to the direction
+2. if found, set the marker to the position of the matched object else FAIL
+3. if there are more pattern_objects, move the marker once by the direction else PASS
+4. if the match next pattern_object matches the object where the marker is at, go to step 3 else FAIL
+
+The LHS *patterns* is matched if each *pattern* it contains is matched
+
+### Pattern Replacement
+If matches, the LHS *patterns* is replaced with the RHS *patterns*.
+
+The RHS *patterns* must have the same *structure* as the LHS *patterns*.
+
+<TODO more about pattern replacement>
+
+
+
+
+<TODO>
 
 ### Rotations and Velocities WIP
 

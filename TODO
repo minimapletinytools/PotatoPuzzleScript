@@ -3,6 +3,7 @@ DONE-split out ExpressionParsers property tests into their own file
   IGNORE-just delete the bad unit tests in parsec_spec...
 DONE-fix orientation abs/rel nonsense?
 DONE-more unit tests
+-remove Late modifier and add late rule section
 -add + operator to rule expr (parse_RuleGroup)
   -figure out why the whitespace is necessary D:
   -add to Parsers.hs
@@ -10,6 +11,7 @@ DONE-more unit tests
 -switch non op character operators to use reserved instead of reservedOp
 -add support for horizontal/vertical velocities
   -probably means adding boolean support to velocities (and figure out how to pattern match LHS/RHS)
+  -should also support knownvelocities/orientations that are multiple velocities/orientations...
 -add commands
   -late?
     -need to understand this better
