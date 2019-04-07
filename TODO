@@ -2,11 +2,12 @@
   -maybe also test out parens/brackets in expression parser. It really should fail...
 -rule parsing can't tell the difference between patterns and pattern followed by a new line
   -why is this even passing my unit tests?
--add constants for orientation and velocities
+-add knownDirections
+-add constants for orientation and velocities and directions
 -add boolean OR support for velocities/orientations
   -allow specifying them in knownvelocities/orientations
 -add + operator to rule expr (parse_RuleGroup)
-  -figure out why the whitespace is necessary D:
+  DONE-figure out why the whitespace is necessary D:
   -add to Parsers.hs
 -add validation
   -pattern match validation

@@ -52,7 +52,7 @@ parse_Boolean = buildExpressionParser opTable_Boolean parse_Boolean_Term <?> "Bo
 
 parse_Command :: PotatoParser Command
 parse_Command = do
-  name <- string "TODOREPLACEMEWITHAREALCOMMAND"
+  name <- PT.lexeme $ string "TODOREPLACEMEWITHAREALCOMMAND"
   -- TODO
   --guardError (Map.member name om) ("unknown object " ++ name)
   return name
@@ -243,8 +243,7 @@ parse_RulePlus :: PotatoParser ()
 parse_RulePlus = PT.reservedOp "+"
 
 parse_RuleGroup :: PotatoParser RuleGroup
--- brackets do not have lexeme so we need it here
-parse_RuleGroup = sepBy (PT.lexeme parse_Rule) parse_RulePlus >>= return . RuleGroup
+parse_RuleGroup = sepBy parse_Rule parse_RulePlus >>= return . RuleGroup
 
 
 -- do we support multi nested loops?
