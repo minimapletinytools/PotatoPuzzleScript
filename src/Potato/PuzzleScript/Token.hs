@@ -14,7 +14,10 @@ module Potato.PuzzleScript.Token(
   symbol,
   whiteSpace,
   commaSep,
-  lexeme
+  lexeme,
+
+  betweenNoLexeme,
+  bracketsNoLexeme
 
   --objKnown,
   --objTermKnown,
@@ -128,6 +131,14 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 commaSep = Token.commaSep lexer
 lexeme = Token.lexeme lexer
 
+
+
+
+betweenNoLexeme :: (String, String) -> PotatoParser a -> PotatoParser a
+betweenNoLexeme (l,r) p = between (lexeme (string l)) (string r) p
+
+bracketsNoLexeme :: PotatoParser a -> PotatoParser a
+bracketsNoLexeme = betweenNoLexeme ("[","]")
 
 --DELETE
 {-

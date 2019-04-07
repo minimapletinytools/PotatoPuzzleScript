@@ -1,6 +1,6 @@
--do brackets test with the lexeme thing
-  -maybe also test out parens/brackets in expression parser. It really should fail...
--rule parsing can't tell the difference between patterns and pattern followed by a new line
+IGNORE-do brackets test with the lexeme thing
+  IGNORE-maybe also test out parens/brackets in expression parser. It really should fail...
+DONE-rule parsing can't tell the difference between patterns and pattern followed by a new line
   -why is this even passing my unit tests?
 -add knownDirections
 -add constants for orientation and velocities and directions

@@ -162,8 +162,11 @@ parse_PatternObj =
   try (parse_ObjectExpr >>= return . PatternObject) <?>
   "PatternObj"
 
+-- |
+-- note this parser does not use lexeme
+-- lexeme is added by parse_Patterns which uses parse_Pattern
 parse_Pattern :: PotatoParser Pattern
-parse_Pattern = PT.brackets $ do
+parse_Pattern = PT.bracketsNoLexeme $ do
   first <- parse_PatternObj
   rest <- many $ do
     op <- parse_PatBinOp
@@ -172,7 +175,13 @@ parse_Pattern = PT.brackets $ do
   return $ foldr (\(op, p) acc -> (\p' -> Pattern_Bin op p' (acc p))) Pattern_PatternObj rest $ first
 
 parse_Patterns :: PotatoParser Patterns
-parse_Patterns = sepBy parse_Pattern (many $ oneOf " \t") >>= return . Patterns
+parse_Patterns = do
+  x <- parse_Pattern
+  -- I don't understand why I need a `try` here
+  -- TODO figure out why...
+  xs <- many . try $ (many (char ' ' <|> char '\t') >> parse_Pattern )
+  PT.whiteSpace
+  return $ Patterns (x:xs)
 
 parse_RuleArrow :: PotatoParser ()
 parse_RuleArrow = PT.reservedOp "->"
