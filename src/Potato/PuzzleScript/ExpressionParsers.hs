@@ -223,9 +223,6 @@ parse_UnscopedRule =
   try parse_UnscopedRule_Patterns <?>
   "UnscopedRule"
 
-parse_RuleModifier :: PotatoParser RuleModifier
-parse_RuleModifier = PT.reserved "Late" >> return LateRule
-
 parse_Rule_Scoped :: PotatoParser Rule
 parse_Rule_Scoped = do
   v <- parse_Velocity
@@ -235,16 +232,9 @@ parse_Rule_Scoped = do
 --validate_Rule_Scoped :: Rule_Scoped
 -- TODO check that velocity is Abs
 
-parse_Rule_Modified :: PotatoParser Rule
-parse_Rule_Modified = do
-  modifier <- parse_RuleModifier
-  r <- parse_Rule
-  return $ Rule_Modified modifier r
-
 parse_Rule :: PotatoParser Rule
 parse_Rule =
   try parse_Rule_Scoped <|>
-  try parse_Rule_Modified <|>
   try (parse_UnscopedRule >>= return . Rule) <|>
   try (parse_Command >>= return . Rule_Command) <?>
   "Rule"

@@ -51,7 +51,6 @@ module Potato.PuzzleScript.Types (
   Pattern(..),
   Patterns(..),
 
-  RuleModifier(..),
   UnscopedRule(..),
   Rule(..),
   RuleGroup(..)
@@ -228,10 +227,6 @@ instance Show Patterns where
 indentOnce :: String -> String
 indentOnce = concat . map ("    " ++) . lines
 
-data RuleModifier = LateRule deriving(Eq)
-instance Show RuleModifier where
-  show LateRule = "Late"
-
 data UnscopedRule = UnscopedRule_Patterns Patterns Patterns | UnscopedRule_Rule Patterns Rule | UnscopedRule_Boolean Boolean Rule deriving(Eq)
 instance Show UnscopedRule where
   show (UnscopedRule_Patterns p1 p2) = show p1 ++ " -> " ++ show p2
@@ -242,12 +237,11 @@ instance Show UnscopedRule where
 --data Rule = Rule_Normal NormalRule | Rule_Late NormalRule
 --because we don't want late rules inside of rules
 
-data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule | Rule_Modified RuleModifier Rule deriving(Eq)
+data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Eq)
 instance Show Rule where
   show (Rule_Command c) = c
   show (Rule r) = show r
   show (Rule_Scoped vel r) = vel ++ " " ++ show r
-  show (Rule_Modified modifier r) = show modifier ++ " " ++ show r
 
 newtype RuleGroup = RuleGroup { unRuleGroup :: [Rule] } deriving(Eq)
 instance Show RuleGroup where

@@ -97,7 +97,6 @@ instance Arbitrary Rule where
   arbitrary = sized arbSized_Rule where
     arbSized_Rule 0 = return $ Rule_Command "TODOREPLACEMEWITHAREALCOMMAND"
     arbSized_Rule n = limitSize 10 $ oneof [Rule <$> resize (n-1) arbitrary,
-      Rule_Modified LateRule <$> resize (n-1) arbitrary,
       Rule_Scoped <$> elements (Map.keys knownVelocities) <*> resize (n-1) arbitrary]
 
 instance Arbitrary RuleGroup where
