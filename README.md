@@ -43,3 +43,4 @@ Added Vty terminal interface for testing interpreter
 - input is handled using rules rather than as a built in primitive. Prelude commands are available for default rules that match Puzzle Script functionality
 - more generalized notion of rule groups and loops
 - no "rigid" keyword. Instead, rigid bodies are implemented using loops and a scoped cancel command (details TBD)
+- late rules are handled in their own section rather than using the `Late` rule modifier

@@ -2,7 +2,7 @@
 
 module Potato.PuzzleScript.ParserOutput (
   Output(..),
-  title, author, homepage, headers, objectList, legend, collisionLayers, rules, winConditions, levels, velocityList,
+  title, author, homepage, headers, objectList, legend, collisionLayers, rules, late, winConditions, levels, velocityList,
   emptyOutput,
   findBackgroundKey,
   PotatoParser
@@ -26,8 +26,9 @@ data Output = Output {
     _objectList :: ObjectMap,
     _legend :: LegendMap,
     _collisionLayers :: [[Object]],
-    --list of loops of groups of rules
+    -- TODO these need to handle rule trees properly
     _rules :: [Rule],
+    _late :: [Rule],
     _winConditions :: [WinCondExpr],
     _levels :: [Level]
 }
@@ -43,6 +44,7 @@ instance Show Output where
     "legend: " ++ (show $ _legend o) ++ "\n" ++
     "collisionLayers: " ++ (show $ _collisionLayers o) ++ "\n" ++
     "rules: " ++ (show $ _rules o) ++ "\n" ++
+    "late rules: " ++ (show $ _late o) ++ "\n" ++
     "winConditions: " ++ (show $ _winConditions o) ++ "\n" ++
     "levels: " ++ (show $ _levels o)
 
@@ -59,6 +61,7 @@ emptyOutput = Output {
     _legend = Map.empty,
     _collisionLayers = [],
     _rules = [],
+    _late = [],
     _winConditions = [],
     _levels = []
   }

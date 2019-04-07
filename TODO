@@ -1,17 +1,14 @@
-DONE-expression parsers can read maps directly out of parsec state -__-
-DONE-split out ExpressionParsers property tests into their own file
-  IGNORE-just delete the bad unit tests in parsec_spec...
-DONE-fix orientation abs/rel nonsense?
-DONE-more unit tests
--remove Late modifier and add late rule section
+-add constants for orientation and velocities
+-add boolean OR support for velocities/orientations
+  -allow specifying them in knownvelocities/orientations
 -add + operator to rule expr (parse_RuleGroup)
   -figure out why the whitespace is necessary D:
   -add to Parsers.hs
--add late rule support
+-add validation
+  -pattern match validation
+  -late rule validation
 -switch non op character operators to use reserved instead of reservedOp
 -add support for horizontal/vertical velocities
-  -probably means adding boolean support to velocities (and figure out how to pattern match LHS/RHS)
-  -should also support knownvelocities/orientations that are multiple velocities/orientations...
 -add commands
   -late?
     -need to understand this better
@@ -38,6 +35,13 @@ DONE-more unit tests
   -require_player_movement
 -add rigid and start/endLoop parsing to rules
 
+DONE-expression parsers can read maps directly out of parsec state -__-
+DONE-split out ExpressionParsers property tests into their own file
+  IGNORE-just delete the bad unit tests in parsec_spec...
+DONE-fix orientation abs/rel nonsense?
+DONE-more unit tests
+DONE-remove Late modifier and add late rule section
+DONE-add late rule support
 DONE-fix parens issue, use expression parser or build your own
 DONE-whats wrong with PT.identifier o__o
   -it was because of infinite loop in Arbitrary instance oops

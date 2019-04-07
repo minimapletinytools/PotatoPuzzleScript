@@ -69,7 +69,7 @@ import Data.List (intersperse)
 import qualified Data.Map as Map
 import qualified Data.Vector.Unboxed as U
 
-data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | WINCONDITIONS | LEVELS deriving (Read, Show, Enum)
+data Header = OBJECTS | LEGEND | SOUNDS | COLLISIONLAYERS | RULES | LATE | WINCONDITIONS | LEVELS deriving (Read, Show, Enum)
 allHeaders :: [Header]
 allHeaders = enumFrom OBJECTS
 

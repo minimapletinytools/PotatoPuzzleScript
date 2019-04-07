@@ -109,8 +109,14 @@ parseCollisionLayers = do
 parseRules :: PotatoParser ()
 parseRules = do
   r <- manyTillHeaderOrEoF $ parse_Rule
-  --manyTillHeaderOrEoF parseLine
   modifyState (set rules r)
+  return ()
+
+
+parseLate :: PotatoParser ()
+parseLate = do
+  r <- manyTillHeaderOrEoF $ parse_Rule
+  modifyState (set late r)
   return ()
 
 parseWinCondExpritions :: PotatoParser ()
@@ -204,6 +210,7 @@ parseSections = do
     , (parseHeader SOUNDS, parseSounds)
     , (parseHeader COLLISIONLAYERS, parseCollisionLayers)
     , (parseHeader RULES, parseRules)
+    , (parseHeader LATE, parseLate)
     , (parseHeader WINCONDITIONS, parseWinCondExpritions)
     , (parseHeader LEVELS, parseLevels)
     ]
