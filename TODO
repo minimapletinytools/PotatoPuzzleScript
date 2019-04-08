@@ -1,7 +1,6 @@
-IGNORE-do brackets test with the lexeme thing
-  IGNORE-maybe also test out parens/brackets in expression parser. It really should fail...
-DONE-rule parsing can't tell the difference between patterns and pattern followed by a new line
-  -why is this even passing my unit tests?
+-remove support for coercing velocity/orientation to the other type
+  -these are specified in the constants
+-remove case sensitivity I guess..
 -add knownDirections
 -add constants for orientation and velocities and directions
 -add boolean OR support for velocities/orientations
@@ -40,6 +39,10 @@ DONE-rule parsing can't tell the difference between patterns and pattern followe
   -require_player_movement
 -add rigid and start/endLoop parsing to rules
 
+IGNORE-do brackets test with the lexeme thing
+  IGNORE-maybe also test out parens/brackets in expression parser. It really should fail...
+DONE-rule parsing can't tell the difference between patterns and pattern followed by a new line
+  -why is this even passing my unit tests?
 DONE-expression parsers can read maps directly out of parsec state -__-
 DONE-split out ExpressionParsers property tests into their own file
   IGNORE-just delete the bad unit tests in parsec_spec...
