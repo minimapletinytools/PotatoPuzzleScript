@@ -85,7 +85,6 @@ parse_Velocity = do
 
 parse_RVelocity :: PotatoParser RVelocity
 parse_RVelocity = do
-  let vm = knownVelocities
   absorrel <- parse_SpaceModifier
   name <- maybeParens parse_Velocity
   return $ SpaceModifiedString absorrel name
