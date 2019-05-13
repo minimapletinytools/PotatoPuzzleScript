@@ -107,22 +107,62 @@ makeVelocity om (SpaceModifiedString osm k) = do
   return $ RTR (combineSpaceModifier sm osm) r
 
 
-{-type OrientationMap = Map.Map Orientation RRotationMatcher
+
+{-
+type OrientationMap = Map.Map Orientation RRotationMatcher
 
 knownOrientations :: OrientationMap
 knownOrientations = Map.fromList
-  [("R_FORWARD", listToMatcher [RRotation Rel zeroRotation])]
+  [ ("FFORWARD", listToMatcher [RRotation Rel zeroRotation])
+  , ("FUP", listToMatcher [RRotation Rel zeroRotation])
+  , ("FBACKWARD", listToMatcher [RRotation Rel zeroRotation])
+  , ("FDOWN", listToMatcher [RRotation Rel zeroRotation])
+  , ("FLEFT", listToMatcher [RRotation Rel zeroRotation])
+  , ("FRIGHT", listToMatcher [RRotation Rel zeroRotation])
+  , ("FPLUSZ", listToMatcher [RRotation Rel zeroRotation])
+  , ("FMINUSZ", listToMatcher [RRotation Rel zeroRotation])
+  ]
 
 
 type VelocityMap = Map.Map Velocity RTRMatcher
 
 knownVelocities :: VelocityMap
 knownVelocities = Map.fromList
-  [ ("v", listToMatcher [RTR Abs identity])
-  , ("^", listToMatcher [RTR Abs identity])
-  , (">", listToMatcher [RTR Abs identity])
-  , ("<", listToMatcher [RTR Abs identity])]
+  [ ("^", listToMatcher [RTR Rel identity])
+  , ("v", listToMatcher [RTR Rel identity])
+  , ("<", listToMatcher [RTR Rel identity])
+  , (">", listToMatcher [RTR Rel identity])
+  , ("^^", listToMatcher [RTR Rel identity])
+  , ("VV", listToMatcher [RTR Rel identity])
+
+  , ("↶", listToMatcher [RTR Rel identity])
+  , ("↷", listToMatcher [RTR Rel identity])
+
+  , ("UP", listToMatcher [RTR Abs identity])
+  , ("DOWN", listToMatcher [RTR Abs identity])
+  , ("LEFT", listToMatcher [RTR Abs identity])
+  , ("RIGHT", listToMatcher [RTR Abs identity])
+  , ("PLUSZ", listToMatcher [RTR Abs identity])
+  , ("MINUSZ", listToMatcher [RTR Abs identity])
+
+  , ("TURN_LEFT", listToMatcher [RTR Rel identity])
+  , ("TURN_RIGHT", listToMatcher [RTR Rel identity])
+
+  , ("VERTICAL", listToMatcher [RTR Abs identity, RTR Abs identity])
+  , ("HORIZONTAL", listToMatcher [RTR Abs identity, RTR Abs identity])
+
+  , ("PARALLEL", listToMatcher [RTR Rel identity, RTR Rel identity])
+  , ("PERPENDICULAR", listToMatcher [RTR Rel identity, RTR Rel identity])
+  ]
+
+
+knownDirections :: VelocityMap
+knownVelocities = Map.fromList
+  [ ("UP", listToMatcher [RTR Abs identity])
+  , ("DOWN", listToMatcher [RTR Abs identity])
+  , ("LEFT", listToMatcher [RTR Abs identity])
+  , ("RIGHT", listToMatcher [RTR Abs identity])
+  , ("PLUSZ", listToMatcher [RTR Abs identity])
+  , ("MINUSZ", listToMatcher [RTR Abs identity])
+  ]
 -}
-
-
---knownDirections :: VelocityMap

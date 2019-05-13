@@ -37,7 +37,7 @@ Execute the `command`.
 If the LHS `patterns` is matched, *replace* with the RHS `patterns`. A LHS `patterns` in a `pattern match` may have an optional `directional modifier`. See Pattern Matching section for more details.
 
 ### boolean statement followed by a rule
-A `boolean statement` is either a `patterns` or a `boolean expression` followed by a `rule`. If the pattern is matched or the expression evaluates to true, execute the RHS `rule`. In this case we say the LHS evaluates to true. If it does not, we say the LHS evaluates to false.
+A `boolean statement` is either a `pattern expression` or a `boolean expression` followed by a `rule`. If the pattern experssion is matched or the expression evaluates to true, execute the RHS `rule`. In this case we say the LHS evaluates to true. If it does not, we say the LHS evaluates to false.
 
 A rule is *done* if
 1. it is a `command` that executed once
@@ -58,19 +58,20 @@ if the `CANCEL N` command is executed, rollback to the start of execution of the
 
 ## Pattern Matching
 
-A `pattern match` has the following structure:
+A `pattern expression` has the following structure:
 ```
-{DIRECTIONAL MODIFIER} [pattern] {[pattern] ...} -> [pattern] {[pattern] ...}
+{DIRECTIONAL MODIFIER} [pattern] {[pattern] ...}
 ```
+
 ### Directional Modifier
 
-Each pattern match may have an optional `directional modifier`. If there is no directional modifier, the default 8 cardinal directions are used. The rule is evaluated once for each direction in the directional modifier. We call the direction a pattern is being matched in the `direction` of the rule.
+Each pattern match may have an optional `directional modifier`. If there is no directional modifier, the default 8 cardinal directions are used. The rule is evaluated for each direction in the directional modifier. This is referred to as the `direction` of the evaluation.
 
 ### Pattern
 
 A `pattern` has the following structure:
 ```
-pattern_object {| pattern_object | ...}
+[pattern_object {| pattern_object | ...}]
 ```
 and a `pattern_object` has the following structure:
 ```
@@ -85,9 +86,15 @@ To match a `pattern`,
 3. if there are more pattern_objects, move the marker once by the direction else PASS
 4. if the match next pattern_object matches the object where the marker is at, go to step 3 else FAIL
 
-The LHS `patterns` is matched if each `pattern` it contains is matched
+The pattern expression is matched if each pattern it contains is matched
 
 ### Pattern Replacement
+
+TODO
+```
+{DIRECTIONAL MODIFIER} [pattern] {[pattern] ...} -> [pattern] {[pattern] ...}
+```
+
 If matches, the LHS `patterns` is replaced with the RHS `patterns`.
 
 The RHS `patterns` must have the same *structure* as the LHS `patterns`.
@@ -104,26 +111,30 @@ The RHS `patterns` must have the same *structure* as the LHS `patterns`.
 
 Orientations are denoted using 2 vectors. The first one is the facing direction, and the second is the up direction.
 
-R_FORWARD: (0,1,0) (0,0,1)
-R_BACKWARDS: (0,-1,0) (0,0,1)
-R_UP: R_FORWARD
-R_DOWN: R_BACKWARDS
-R_RIGHT: (-1,0,0) (0,0,1)
-R_LEFT: (-1,0,0) (0,0,1)
+FFORWARD: (0,1,0) (0,0,1)
+FBACKWARD: (0,-1,0) (0,0,1)
+FUP: FFORWARD
+FDOWN: FBACKWARD
+FRIGHT: (-1,0,0) (0,0,1)
+FLEFT: (-1,0,0) (0,0,1)
 
-All `orientations` are *relative* to `direction` of the rule. It can be made *absolute* by adding `Abs` in front e.g.
+All `orientations` are *relative* to `direction` of the rule. It can be made *absolute* by adding `Abs_` in front e.g.
+
 ```
-Abs R_FORWARD
+Abs_FFORWARD
 ```
 
-<TODO create your own orientation constants>
+an `orientation` can also be made by combining existing orientations with the `or` operator to match more than one e.g.
 
+```
+FFORWARD || FBACKWARD
+```
 
 ### Velocity
 
 The following available `velocity` constants are denoted with two vectors. The first one is the translation, and the second is the rotation in euler angles. Some constants are denoted as other constants combined with or.
 
-`velocities` can be *absolute* or *relative*. They can be coerced to the other type by adding `Rel` or `Abs` in front of the respectively.
+~`velocities` can be *absolute* or *relative*. They can be coerced to the other type by adding `Rel` or `Abs` in front of the respectively.~
 
 <TODO allow using direction as velocity>
 
@@ -133,21 +144,27 @@ The following available `velocity` constants are denoted with two vectors. The f
 v: Rel (0,-1,0) id
 ^^: Rel (0,0,1) id
 vv: Rel (0,0,-1) id
-M_PLUSZ: Abs (0,0,1) id
-M_MINUSZ: Abs (0,0,-1) id
-M_RIGHT: Abs (1,0,0) id
-M_LEFT: Abs (-1,0,0) id
-M_UP: Abs (0,1,0) id
-M_DOWN: Abs (0,-1,0) id
-M_LEFT: Abs (-1,0,0) id
+
+PLUSZ: Abs (0,0,1) id
+MINUSZ: Abs (0,0,-1) id
+RIGHT: Abs (1,0,0) id
+LEFT: Abs (-1,0,0) id
+UP: Abs (0,1,0) id
+DOWN: Abs (0,-1,0) id
+LEFT: Abs (-1,0,0) id
+
 TURN_LEFT: Rel id (0,0,π/2)
 TURN_RIGHT: Rel id (0,0,-π/2)
-TURN_PLUSZ: Rel id(π/2,0,0)
-TURN_MINUSZ: Rel id(-π/2,0,0)
-vertical: M_UP or M_DOWN
-horizontal: M_LEFT or M_RIGHT
+vertical: UP or DOWN
+horizontal: LEFT or RIGHT
 parallel: > or <
 perpendicular: ^ or v
+
+a `velocity` can also be made by combining existing velocities with the `or` operator e.g.
+
+```
+LEFT or RIGHT
+```
 
 
 
@@ -162,9 +179,29 @@ DOWN: (0,-1,0)
 PLUS_Z: (0,0,1)
 MINUS_Z: (0,0,-1)
 
+a `direction` can also be made by combining existing directions with the `or` operator e.g.
+
+```
+LEFT or RIGHT
+```
+
+
+
+OLD STUFF BELOW HERE
+### Pattern
+
+
 ### Pattern Matching
 
+a pattern match has the following syntax
+
+```
 {scope} [{vel} {rot} object {| ...}] -> [{vel} {rot} object {| ...}]
+```
+
+and has the following constraints on LHS and RHS of the expression:
+
+TODO
 
 if scope is nil, then translation component of first bound velocity is used
 if scope is SCOPE_PATTERN, then all directions matching SCOPE_PATTERN are tried for scope (i.e. duplicate rules for each scope matching SCOPE_PATTERN)

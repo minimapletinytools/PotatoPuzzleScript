@@ -5,6 +5,8 @@
 -add constants for orientation and velocities and directions
 -add boolean OR support for velocities/orientations
   -allow specifying them in knownvelocities/orientations
+  -add support for horizontal/vertical velocities
+
 -add + operator to rule expr (parse_RuleGroup)
   DONE-figure out why the whitespace is necessary D:
   -add to Parsers.hs
@@ -12,10 +14,8 @@
   -pattern match validation
   -late rule validation
 -switch non op character operators to use reserved instead of reservedOp
--add support for horizontal/vertical velocities
+
 -add commands
-  -late?
-    -need to understand this better
   -cancel
   -win
   -message
