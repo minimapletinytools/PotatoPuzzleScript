@@ -98,14 +98,20 @@ parse_ObjectExpr_Term = PT.parens parse_ObjectExpr <|> (parse_SingleObject >>= r
 parse_ObjectExpr :: PotatoParser ObjectExpr
 parse_ObjectExpr = buildExpressionParser opTable_ObjectExpr parse_ObjectExpr_Term <?> "ObjectExpr"
 
-
+validate_LegendExpr :: LegendExpr -> Bool
+validate_LegendExpr (LegendExpr _ x) =  checkObjExpr x where
+  checkObjExpr = \case
+    (ObjectExpr_Single _) -> True
+    (ObjectExpr_Bin And_Obj x y) -> checkObjExpr x && checkObjExpr y
 
 parse_LegendExpr :: PotatoParser LegendExpr
 parse_LegendExpr = do
   (key:[]) <- try PT.identifier <|> try PT.operator <?> "unreserved char"
   PT.reservedOp "="
   value <- parse_ObjectExpr
-  return $ LegendExpr key value
+  let r = LegendExpr key value
+  guardError (validate_LegendExpr r) "invalid object expression in legend expression"
+  return r
 
 parse_WinUnOp :: PotatoParser WinUnOp
 parse_WinUnOp =

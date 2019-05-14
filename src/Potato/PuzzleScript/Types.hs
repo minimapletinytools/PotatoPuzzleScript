@@ -163,10 +163,6 @@ instance Show UnscopedRule where
   show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)
   show (UnscopedRule_Boolean b r) = show b ++ " ->\n" ++ indentOnce (show r)
 
--- TODO need NormalRule then have
---data Rule = Rule_Normal NormalRule | Rule_Late NormalRule
---because we don't want late rules inside of rules
-
 data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Eq)
 instance Show Rule where
   show (Rule_Command c) = c

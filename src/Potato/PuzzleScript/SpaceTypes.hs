@@ -29,6 +29,7 @@ combineSpaceModifier Rel _ = Rel
 combineSpaceModifier Default x = x
 
 -- these are named identifiers of Rotations and TRs
+-- TODO rename these variables
 type Orientation = String
 type Velocity = String
 
@@ -71,7 +72,23 @@ listToMatcher xs = Matcher_ {
 type RRotationMatcher = Matcher_ RRotation
 type RTRMatcher = Matcher_ RTR
 
---TODO isRTRMatcherDirection :: TR -> Bool
+isRTRMatcherDirection :: RTRMatcher -> Bool
+isRTRMatcherDirection m = count == 1 && r where
+  xs = enumerate m
+  count = length xs
+  x = head xs
+  r = case x of
+    RTR Abs _ -> True
+    _ -> False
+
+isRRotationMatcherOrientation :: RRotationMatcher -> Bool
+isRRotationMatcherOrientation m = count == 1 && r where
+  xs = enumerate m
+  count = length xs
+  x = head xs
+  r = case x of
+    RRotation Abs _ -> True
+    _ -> False
 
 -- |
 -- use for parsing object orientation in legend
