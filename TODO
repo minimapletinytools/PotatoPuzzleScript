@@ -1,4 +1,4 @@
--remove support for coercing velocity/orientation to the other type
+DONE-remove support for coercing velocity/orientation to the other type
   -these are specified in the constants
 -remove case sensitivity I guess..
 -add knownDirections

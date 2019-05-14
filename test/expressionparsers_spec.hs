@@ -52,7 +52,7 @@ instance Arbitrary PatternObj where
   arbitrary = oneof $ [PatternObject <$> arbitrary,
     do
       obj <- arbitrary
-      KnownRVelocity vel <- arbitrary
+      KnownVelocity vel <- arbitrary
       return $ PatternObject_Velocity vel obj]
 
 instance Arbitrary Pattern where

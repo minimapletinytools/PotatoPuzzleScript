@@ -65,17 +65,12 @@ allHeaders = enumFrom OBJECTS
 type Object = String
 -- TODO make Object var for "..."
 
-
-
 type Command = String
 type Color = String
-
-
 
 type ObjectMap = Map.Map Object Color
 type LegendKey = Char
 type LegendMap = Map.Map LegendKey ObjectExpr
-
 
 type Size = (Int, Int, Int)
 type LevelSlice = U.Vector Char
@@ -101,11 +96,11 @@ instance Show ObjBinOp where
   show And_Obj = "and"
   show Or_Obj = "or"
 
-data SingleObject = SingleObject Object | SingleObject_Orientation ROrientation Object deriving(Eq)
+data SingleObject = SingleObject Object | SingleObject_Orientation Orientation Object deriving(Eq)
 instance Show SingleObject where
   show (SingleObject obj) = obj
-  show (SingleObject_Orientation orient obj) = show orient ++ " " ++ obj
-  --show (SingleObject_Orientation orient obj) = "(" ++ show orient ++ " " ++ obj ++ ")"
+  show (SingleObject_Orientation orient obj) = orient ++ " " ++ obj
+  --show (SingleObject_Orientation orient obj) = "(" ++ orient ++ " " ++ obj ++ ")"
 
 data ObjectExpr = ObjectExpr_Single SingleObject| ObjectExpr_Bin ObjBinOp ObjectExpr ObjectExpr deriving(Eq)
 instance Show ObjectExpr where
@@ -139,10 +134,10 @@ data PatBinOp = Pipe deriving(Eq)
 instance Show PatBinOp where
   show Pipe = "|"
 -- velocity restricted to single objects for now
-data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity RVelocity SingleObject deriving(Eq)
+data PatternObj = PatternObject ObjectExpr | PatternObject_Velocity Velocity SingleObject deriving(Eq)
 instance Show PatternObj where
   show (PatternObject expr) = show expr
-  show (PatternObject_Velocity vel obj) = show vel ++ " " ++ show obj
+  show (PatternObject_Velocity vel obj) = vel ++ " " ++ show obj
 
 -- TODO may want to add more separators, not just the | that inherits scope
 data Pattern = Pattern_PatternObj PatternObj | Pattern_Bin PatBinOp PatternObj Pattern deriving(Eq)
@@ -151,7 +146,7 @@ showPattern_ :: Pattern -> String
 showPattern_ (Pattern_PatternObj p) = show p
 showPattern_ (Pattern_Bin op p1 p2) = show p1 ++ " " ++ show op ++ " " ++ showPattern_ p2
 instance Show Pattern where
-  show p = "[ " ++ showPattern_ p ++ " ]"
+  show p = "[" ++ showPattern_ p ++ "]"
 
 newtype Patterns = Patterns { unPatterns::[Pattern] } deriving(Eq)
 

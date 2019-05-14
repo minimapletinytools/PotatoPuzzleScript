@@ -32,29 +32,18 @@ import Control.Monad.Identity
 import qualified Data.Text as T
 import qualified Text.Parsec.Token as Token
 
-
-emptyDef :: Token.GenLanguageDef T.Text Output Identity
-emptyDef = Token.LanguageDef
-           { Token.commentStart   = ""
-           , Token.commentEnd     = ""
-           , Token.commentLine    = ""
-           , Token.nestedComments = True
-           , Token.identStart     = letter <|> char '_'
-           , Token.identLetter    = alphaNum <|> oneOf "_'"
-           , Token.opStart        = Token.opLetter emptyDef
-           , Token.opLetter       = oneOf ":!#$%&*+./<=>?@\\^|-~"
-           , Token.reservedOpNames= []
-           , Token.reservedNames  = []
-           , Token.caseSensitive  = True
-           }
-
-
-languageDef_ =
-  emptyDef { Token.commentStart    = "/*"
+languageDef_ :: Token.GenLanguageDef T.Text Output Identity
+languageDef_ = Token.LanguageDef
+           { Token.commentStart    = "/*"
            , Token.commentEnd      = "*/"
            , Token.commentLine     = "//"
-           , Token.identStart      = letter
-           , Token.identLetter     = alphaNum
+           , Token.nestedComments = True
+           , Token.opLetter       = oneOf ":!#$%&*+./<=>?@\\^|-~"
+           , Token.opStart        = Token.opLetter languageDef_
+           , Token.identStart     = letter <|> char '_'
+           , Token.identLetter    = alphaNum <|> oneOf "_'↶↷"
+           -- note that operators are always case sensitive
+           , Token.caseSensitive   = False
            , Token.reservedNames   = [
 
                                      -- object ops
@@ -106,12 +95,14 @@ languageDef_ =
                                       , "No"
 
                                      ]
-           -- note that operators are always case sensitive
-           --, Token.caseSensitive   = False
            }
 
 languageDef = languageDef_ {
-  Token.reservedNames = Token.reservedNames languageDef_ ++ map show allKeyboardInputs
+  Token.reservedNames = Token.reservedNames languageDef_
+    ++ map show allKeyboardInputs
+    -- ++ map show (Map.keys knownOrientations)
+    -- ++ map show (Map.keys knownVelocities)
+    -- ++ map show (Map.keys knownDirections)
 }
 
 lexer = Token.makeTokenParser languageDef

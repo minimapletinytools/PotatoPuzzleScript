@@ -10,8 +10,8 @@ module Common (
   anObject,
   defaultOutput,
   legendKeys,
-  KnownROrientation(..),
-  KnownRVelocity(..),
+  KnownOrientation(..),
+  KnownVelocity(..),
   KnownObject(..)
 ) where
 
@@ -95,19 +95,17 @@ instance Arbitrary Boolean where
         b2 <- arbSized_Boolean s2
         return $ Boolean_Bin op b1 b2]
 
-newtype KnownROrientation = KnownROrientation ROrientation
-instance Arbitrary KnownROrientation where
+newtype KnownOrientation = KnownOrientation Orientation
+instance Arbitrary KnownOrientation where
   arbitrary = do
-    absorrel <- elements [Abs, Rel, Default]
     orient <- elements $ Map.keys knownOrientations
-    return $ KnownROrientation $ SpaceModifiedString absorrel orient
+    return $ KnownOrientation orient
 
-newtype KnownRVelocity = KnownRVelocity RVelocity
-instance Arbitrary KnownRVelocity where
+newtype KnownVelocity = KnownVelocity Velocity
+instance Arbitrary KnownVelocity where
   arbitrary = do
-    absorrel <- elements [Abs, Rel, Default]
     vel <- elements $ Map.keys knownVelocities
-    return $ KnownRVelocity $ SpaceModifiedString absorrel vel
+    return $ KnownVelocity vel
 
 newtype KnownObject = KnownObject Object deriving(Show)
 instance Arbitrary KnownObject where
@@ -117,7 +115,7 @@ instance Arbitrary SingleObject where
   arbitrary = oneof $ [SingleObject <$> elements defaultObjects,
     do
       KnownObject obj <- arbitrary
-      KnownROrientation orient <- arbitrary
+      KnownOrientation orient <- arbitrary
       return $ SingleObject_Orientation orient obj]
 
 instance Arbitrary ObjectExpr where

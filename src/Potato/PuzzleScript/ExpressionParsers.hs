@@ -64,17 +64,11 @@ parse_Object = do
   guardError (Map.member name om) ("unknown object " ++ name)
   return name
 
-parse_SpaceModifier :: PotatoParser SpaceModifier
-parse_SpaceModifier = try (PT.symbol "Abs" >> return Abs) <|> try (PT.symbol "Rel" >> return Rel) <|> return Default
+--parse_SpaceModifier :: PotatoParser SpaceModifier
+--parse_SpaceModifier = try (PT.symbol "Abs" >> return Abs) <|> try (PT.symbol "Rel" >> return Rel) <|> return Default
 
 parse_Orientation :: PotatoParser Orientation
 parse_Orientation = choice (map (\x -> do { PT.reserved x; return x}) (Map.keys knownOrientations))
-
-parse_ROrientation :: PotatoParser ROrientation
-parse_ROrientation = do
-  absorrel <- parse_SpaceModifier
-  name <- maybeParens parse_Orientation
-  return $ SpaceModifiedString absorrel name
 
 parse_Velocity :: PotatoParser Velocity
 parse_Velocity = do
@@ -83,16 +77,9 @@ parse_Velocity = do
   guardError (Map.member name vm) ("unknown velocity " ++ name)
   return name
 
-parse_RVelocity :: PotatoParser RVelocity
-parse_RVelocity = do
-  absorrel <- parse_SpaceModifier
-  name <- maybeParens parse_Velocity
-  return $ SpaceModifiedString absorrel name
-
-
 parse_SingleObject_Orientation :: PotatoParser SingleObject
 parse_SingleObject_Orientation = do
-  orient <- parse_ROrientation
+  orient <- parse_Orientation
   obj <- parse_Object
   return $ SingleObject_Orientation orient obj
 
@@ -151,7 +138,7 @@ parse_PatBinOp = do PT.reservedOp "|" >> return Pipe
 
 parse_PatternObject_Velocity :: PotatoParser PatternObj
 parse_PatternObject_Velocity = do
-  v <- parse_RVelocity
+  v <- parse_Velocity
   obj <- parse_SingleObject
   return $ PatternObject_Velocity v obj
 
@@ -215,14 +202,12 @@ parse_UnscopedRule_Rule = do
   r <- parse_Rule
   return $ UnscopedRule_Rule p r
 
-
 parse_UnscopedRule_Boolean :: PotatoParser UnscopedRule
 parse_UnscopedRule_Boolean = do
   p <- parse_Boolean
   parse_RuleArrow
   r <- parse_Rule
   return $ UnscopedRule_Boolean p r
-
 
 parse_UnscopedRule :: PotatoParser UnscopedRule
 parse_UnscopedRule =
@@ -233,6 +218,7 @@ parse_UnscopedRule =
 
 parse_Rule_Scoped :: PotatoParser Rule
 parse_Rule_Scoped = do
+  -- TODO change to parse_Direction
   v <- parse_Velocity
   r <- parse_UnscopedRule
   return $ Rule_Scoped v r
@@ -246,6 +232,9 @@ parse_Rule =
   try (parse_UnscopedRule >>= return . Rule) <|>
   try (parse_Command >>= return . Rule_Command) <?>
   "Rule"
+
+validate_Late_Rule :: Rule -> Bool
+validate_Late_Rule r = undefined
 
 parse_RulePlus :: PotatoParser ()
 parse_RulePlus = PT.reservedOp "+"
