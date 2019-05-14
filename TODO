@@ -1,7 +1,7 @@
 DONE-remove support for coercing velocity/orientation to the other type
   -these are specified in the constants
--remove case sensitivity I guess..
--add knownDirections
+DONE-remove case sensitivity I guess..
+DONE-add knownDirections
 -add constants for orientation and velocities and directions
 -add boolean OR support for velocities/orientations
   -allow specifying them in knownvelocities/orientations

@@ -30,9 +30,9 @@ maybeParens p = PT.parens p <|> p
 
 opTable_Boolean :: [[Operator T.Text Output Identity Boolean]]
 opTable_Boolean =
-  [[Prefix (PT.reservedOp "not" >> return (Boolean_Not))],
-  [Infix (PT.reservedOp "and" >> return (Boolean_Bin And)) AssocLeft],
-  [Infix (PT.reservedOp "or" >> return (Boolean_Bin Or)) AssocLeft]]
+  [[Prefix (PT.reserved "not" >> return (Boolean_Not))],
+  [Infix (PT.reserved "and" >> return (Boolean_Bin And)) AssocLeft],
+  [Infix (PT.reserved "or" >> return (Boolean_Bin Or)) AssocLeft]]
 
 parse_Boolean_Input :: PotatoParser Boolean
 parse_Boolean_Input = do
@@ -89,8 +89,8 @@ parse_SingleObject = (try (parse_Object >>= return . SingleObject) <|> parse_Sin
 
 opTable_ObjectExpr :: [[Operator T.Text Output Identity ObjectExpr]]
 opTable_ObjectExpr =
-  [[Infix (PT.reservedOp "and" >> return (ObjectExpr_Bin And_Obj)) AssocLeft],
-  [Infix (PT.reservedOp "or" >> return (ObjectExpr_Bin Or_Obj)) AssocLeft]]
+  [[Infix (PT.reserved "and" >> return (ObjectExpr_Bin And_Obj)) AssocLeft],
+  [Infix (PT.reserved "or" >> return (ObjectExpr_Bin Or_Obj)) AssocLeft]]
 
 parse_ObjectExpr_Term :: PotatoParser ObjectExpr
 parse_ObjectExpr_Term = PT.parens parse_ObjectExpr <|> (parse_SingleObject >>= return . ObjectExpr_Single)
@@ -109,13 +109,13 @@ parse_LegendExpr = do
 
 parse_WinUnOp :: PotatoParser WinUnOp
 parse_WinUnOp =
-  try (PT.reservedOp "All" >> return Win_All) <|>
-  try (PT.reservedOp "Some" >> return Win_Some) <|>
-  try (PT.reservedOp "No" >> return Win_No) <?>
+  try (PT.reserved "All" >> return Win_All) <|>
+  try (PT.reserved "Some" >> return Win_Some) <|>
+  try (PT.reserved "No" >> return Win_No) <?>
   "valid win condition unary operator"
 
 parse_WinBinOp :: PotatoParser WinBinOp
-parse_WinBinOp = PT.reservedOp "on" >> return Win_On
+parse_WinBinOp = PT.reserved "on" >> return Win_On
 
 parse_BasicWinCondExpr :: PotatoParser BasicWinCondExpr
 parse_BasicWinCondExpr = do

@@ -56,53 +56,17 @@ languageDef_ = Token.LanguageDef
                                       , "Some"
                                       , "No"
 
-                                      -- hardcoded rel orientations
-
-                                      -- hardcoded abs orientations
-
-                                      -- hardcoded directional velocities
-                                      -- I got lazy in parse_Velocity, anyways, probably no need to actually reserve these
-                                      --, "v"
-
                                       -- rule modifiers
                                       , "Late"
 
                                       -- commands
                                      ]
-           , Token.reservedOpNames = [
-                                      -- legend ops
-                                      "="
-
-                                      -- object/boolean ops
-                                      , "not"
-                                      , "and"
-                                      , "or"
-
-                                      -- pattern ops
-                                      , "|"
-
-                                      -- rule ops
-                                      , "->"
-                                      , "+"
-
-                                      -- hardcoded directional velocities
-                                      -- I got lazy in parse_Velocity, anyways, probably no need to actually reserve these
-                                      --, "^","<",">"
-
-                                      -- win conditions ops
-                                      , "All"
-                                      , "Some"
-                                      , "No"
-
-                                     ]
+           , Token.reservedOpNames = [ "=", "|", "->", "+" ]
            }
 
 languageDef = languageDef_ {
   Token.reservedNames = Token.reservedNames languageDef_
     ++ map show allKeyboardInputs
-    -- ++ map show (Map.keys knownOrientations)
-    -- ++ map show (Map.keys knownVelocities)
-    -- ++ map show (Map.keys knownDirections)
 }
 
 lexer = Token.makeTokenParser languageDef
