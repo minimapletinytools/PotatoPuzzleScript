@@ -38,10 +38,10 @@ languageDef_ = Token.LanguageDef
            , Token.commentEnd      = "*/"
            , Token.commentLine     = "//"
            , Token.nestedComments = True
-           , Token.opLetter       = oneOf ":!#$%&*+./<=>?@\\^|-~"
+           , Token.opLetter       = oneOf ":!#$%&*+./<=>?@\\^|-~↶↷"
            , Token.opStart        = Token.opLetter languageDef_
-           , Token.identStart     = letter <|> char '_'
-           , Token.identLetter    = alphaNum <|> oneOf "_'↶↷"
+           , Token.identStart     = letter <|> oneOf "_"
+           , Token.identLetter    = alphaNum <|> oneOf "_"
            -- note that operators are always case sensitive
            , Token.caseSensitive   = False
            , Token.reservedNames   = [

@@ -32,6 +32,8 @@ module Potato.Math.Integral.TR
   , (!*)
   , (!*!)
   , invTR
+  , module Linear.V3
+  , module Linear.V4
   ) where
 
 import Lens.Micro.Platform

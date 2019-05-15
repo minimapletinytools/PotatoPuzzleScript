@@ -1,11 +1,3 @@
-DONE-remove support for coercing velocity/orientation to the other type
-  -these are specified in the constants
-DONE-remove case sensitivity I guess..
-DONE-add knownDirections
--add constants for orientation and velocities and directions
--add boolean OR support for velocities/orientations
-  -allow specifying them in knownvelocities/orientations
-  -add support for horizontal/vertical velocities
 
 -add + operator to rule expr (parse_RuleGroup)
   DONE-figure out why the whitespace is necessary D:
@@ -13,7 +5,7 @@ DONE-add knownDirections
 -add validation
   -pattern match validation
   -late rule validation
--switch non op character operators to use reserved instead of reservedOp
+DONE/IGNORE-switch non op character operators to use reserved instead of reservedOp
 
 -add commands
   -cancel
@@ -39,6 +31,15 @@ DONE-add knownDirections
   -require_player_movement
 -add rigid and start/endLoop parsing to rules
 
+DONE-remove support for coercing velocity/orientation to the other type
+  -these are specified in the constants
+DONE-remove case sensitivity I guess..
+DONE-add knownDirections
+DONE-add constants for orientation and velocities and directions
+IGNORE-add boolean OR support for velocities/orientations
+  DONE-allow specifying them in knownvelocities/orientations
+  DONE-add support for horizontal/vertical velocities
+  -not doing this anymore, it's done at the knownVelocitiy/Orientation/Direction level now.
 IGNORE-do brackets test with the lexeme thing
   IGNORE-maybe also test out parens/brackets in expression parser. It really should fail...
 DONE-rule parsing can't tell the difference between patterns and pattern followed by a new line

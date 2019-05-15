@@ -107,6 +107,7 @@ knownOrientations :: OrientationMap
 knownOrientations = Map.fromList
   [ ("FFORWARD", listToMatcher [RRotation Rel zeroRotation])
   , ("FUP", listToMatcher [RRotation Rel zeroRotation])
+  -- TODO
   , ("FBACKWARD", listToMatcher [RRotation Rel zeroRotation])
   , ("FDOWN", listToMatcher [RRotation Rel zeroRotation])
   , ("FLEFT", listToMatcher [RRotation Rel zeroRotation])
@@ -115,42 +116,69 @@ knownOrientations = Map.fromList
   , ("FMINUSZ", listToMatcher [RRotation Rel zeroRotation])
   ]
 
+trup :: TR
+trup = TR (V3 0 1 0) zeroRotation
+trdown :: TR
+trdown = TR (V3 0 (-1) 0) zeroRotation
+trleft :: TR
+trleft = TR (V3 1 0 0) zeroRotation
+trright :: TR
+trright = TR (V3 (-1) 0 0) zeroRotation
+trplusz :: TR
+trplusz = TR (V3 0 0 1) zeroRotation
+trminusz :: TR
+trminusz = TR (V3 0 0 (-1)) zeroRotation
+
+tr90z :: TR
+tr90z = TR zeroTranslation $
+  V3 (V3 0 1 0)
+     (V3 (-1) 0 0)
+     (V3 0 0 1)
+
+tr270z :: TR
+tr270z = TR zeroTranslation $
+  V3 (V3 0 (-1) 0)
+     (V3 1 0 0)
+     (V3 0 0 1)
+
 knownVelocities :: VelocityMap
 knownVelocities = Map.fromList
-  [ ("^", listToMatcher [RTR Rel identity])
-  , ("v", listToMatcher [RTR Rel identity])
-  , ("<", listToMatcher [RTR Rel identity])
-  , (">", listToMatcher [RTR Rel identity])
-  , ("^^", listToMatcher [RTR Rel identity])
-  , ("VV", listToMatcher [RTR Rel identity])
+  [ ("^", listToMatcher [RTR Rel trup])
+  , ("v", listToMatcher [RTR Rel trdown])
+  , ("<", listToMatcher [RTR Rel trleft])
+  , (">", listToMatcher [RTR Rel trright])
+  , ("^^", listToMatcher [RTR Rel trplusz])
+  , ("VV", listToMatcher [RTR Rel trminusz])
 
-  --, ("↶", listToMatcher [RTR Rel identity])
-  --, ("↷", listToMatcher [RTR Rel identity])
+  -- TODO
+  , ("↶", listToMatcher [RTR Rel tr90z])
+  , ("↷", listToMatcher [RTR Rel tr270z])
 
-  , ("UP", listToMatcher [RTR Abs identity])
-  , ("DOWN", listToMatcher [RTR Abs identity])
-  , ("LEFT", listToMatcher [RTR Abs identity])
-  , ("RIGHT", listToMatcher [RTR Abs identity])
-  , ("PLUSZ", listToMatcher [RTR Abs identity])
-  , ("MINUSZ", listToMatcher [RTR Abs identity])
+  , ("PARALLEL", listToMatcher [RTR Rel trup, RTR Rel trdown])
+  , ("PERPENDICULAR", listToMatcher [RTR Rel trleft, RTR Rel trright])
 
-  , ("TURN_LEFT", listToMatcher [RTR Rel identity])
-  , ("TURN_RIGHT", listToMatcher [RTR Rel identity])
+  , ("UP", listToMatcher [RTR Abs trup])
+  , ("DOWN", listToMatcher [RTR Abs trdown])
+  , ("LEFT", listToMatcher [RTR Abs trleft])
+  , ("RIGHT", listToMatcher [RTR Abs trright])
+  , ("PLUSZ", listToMatcher [RTR Abs trplusz])
+  , ("MINUSZ", listToMatcher [RTR Abs trminusz])
 
-  , ("VERTICAL", listToMatcher [RTR Abs identity, RTR Abs identity])
-  , ("HORIZONTAL", listToMatcher [RTR Abs identity, RTR Abs identity])
+  -- TODO
+  , ("TURN_LEFT", listToMatcher [RTR Abs tr90z])
+  , ("TURN_RIGHT", listToMatcher [RTR Abs tr270z])
 
-  , ("PARALLEL", listToMatcher [RTR Rel identity, RTR Rel identity])
-  , ("PERPENDICULAR", listToMatcher [RTR Rel identity, RTR Rel identity])
+  , ("VERTICAL", listToMatcher [RTR Abs trup, RTR Abs trdown])
+  , ("HORIZONTAL", listToMatcher [RTR Abs trleft, RTR Abs trright])
   ]
 
 
 knownDirections :: VelocityMap
 knownDirections = Map.fromList
-  [ ("UP", listToMatcher [RTR Abs identity])
-  , ("DOWN", listToMatcher [RTR Abs identity])
-  , ("LEFT", listToMatcher [RTR Abs identity])
-  , ("RIGHT", listToMatcher [RTR Abs identity])
-  , ("PLUSZ", listToMatcher [RTR Abs identity])
-  , ("MINUSZ", listToMatcher [RTR Abs identity])
+  [ ("UP", listToMatcher [RTR Abs trup])
+  , ("DOWN", listToMatcher [RTR Abs trdown])
+  , ("LEFT", listToMatcher [RTR Abs trleft])
+  , ("RIGHT", listToMatcher [RTR Abs trright])
+  , ("PLUSZ", listToMatcher [RTR Abs trplusz])
+  , ("MINUSZ", listToMatcher [RTR Abs trminusz])
   ]
