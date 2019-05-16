@@ -93,9 +93,16 @@ instance Arbitrary UnscopedRule where
       rule <- resize s2 arbitrary
       return $ UnscopedRule_Boolean b rule]-}
 
+instance Arbitrary Command where
+  arbitrary = do
+    let
+      genSafeChar = elements ([' '] ++ ['a'..'z'])
+    msg <- listOf genSafeChar
+    elements [Cancel, Win, Message msg]
+
 instance Arbitrary Rule where
   arbitrary = sized arbSized_Rule where
-    arbSized_Rule 0 = return $ Rule_Command "TODOREPLACEMEWITHAREALCOMMAND"
+    arbSized_Rule 0 = arbitrary >>= return . Rule_Command
     arbSized_Rule n = limitSize 10 $ oneof [Rule <$> resize (n-1) arbitrary,
       Rule_Scoped <$> elements (Map.keys knownVelocities) <*> resize (n-1) arbitrary]
 

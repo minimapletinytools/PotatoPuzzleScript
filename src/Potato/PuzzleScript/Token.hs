@@ -56,10 +56,10 @@ languageDef_ = Token.LanguageDef
                                       , "Some"
                                       , "No"
 
-                                      -- rule modifiers
-                                      , "Late"
-
                                       -- commands
+                                      , "Message"
+                                      , "Win"
+                                      , "Cancel"
                                      ]
            , Token.reservedOpNames = [ "=", "|", "->", "+" ]
            }

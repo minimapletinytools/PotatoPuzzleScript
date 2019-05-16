@@ -51,11 +51,14 @@ parse_Boolean :: PotatoParser Boolean
 parse_Boolean = buildExpressionParser opTable_Boolean parse_Boolean_Term <?> "Boolean"
 
 parse_Command :: PotatoParser Command
-parse_Command = do
-  name <- PT.lexeme $ string "TODOREPLACEMEWITHAREALCOMMAND"
-  -- TODO
-  --guardError (Map.member name om) ("unknown object " ++ name)
-  return name
+parse_Command = parseMessage <|> parseRegular <?> "command" where
+  parseMessage = do
+    PT.reserved "Message"
+    msg <- many $ noneOf "\n\r+"
+    return $ Message msg
+  parseRegular =
+    (PT.reserved "Cancel" >> return Cancel) <|>
+    (PT.reserved "Win" >> return Win)
 
 parse_Object :: PotatoParser Object
 parse_Object = do

@@ -14,8 +14,6 @@ module Potato.PuzzleScript.Types (
 
   Object,
 
-
-  Command,
   Color,
   LegendKey,
   ObjectMap,
@@ -37,6 +35,8 @@ module Potato.PuzzleScript.Types (
   PatternObj(..),
   Pattern(..),
   Patterns(..),
+
+  Command(..),
 
   UnscopedRule(..),
   Rule(..),
@@ -65,7 +65,6 @@ allHeaders = enumFrom OBJECTS
 type Object = String
 -- TODO make Object var for "..."
 
-type Command = String
 type Color = String
 
 type ObjectMap = Map.Map Object Color
@@ -77,7 +76,7 @@ type LevelSlice = U.Vector Char
 -- level is from x y z order min to max
 data Level = Level Size [LevelSlice] String deriving(Show)
 
-data KeyboardInput = K_NONE | K_LEFT | K_RIGHT | K_DOWN | K_UP | K_Z | K_X deriving(Show, Read, Eq, Enum)
+data KeyboardInput = K_NONE | K_LEFT | K_RIGHT | K_DOWN | K_UP | K_ACTION | K_Z | K_X deriving(Show, Read, Eq, Enum)
 allKeyboardInputs :: [KeyboardInput]
 allKeyboardInputs = enumFrom K_LEFT
 
@@ -163,9 +162,15 @@ instance Show UnscopedRule where
   show (UnscopedRule_Rule p r) = show p ++ " ->\n" ++ indentOnce (show r)
   show (UnscopedRule_Boolean b r) = show b ++ " ->\n" ++ indentOnce (show r)
 
+data Command = Cancel | Win | Message String deriving (Eq)
+instance Show Command where
+  show Cancel = "CANCEL"
+  show Win = "WIN"
+  show (Message x) = "MESSAGE " ++ x
+
 data Rule = Rule_Command Command | Rule UnscopedRule | Rule_Scoped Velocity UnscopedRule deriving(Eq)
 instance Show Rule where
-  show (Rule_Command c) = c
+  show (Rule_Command c) = show c
   show (Rule r) = show r
   show (Rule_Scoped vel r) = vel ++ " " ++ show r
 

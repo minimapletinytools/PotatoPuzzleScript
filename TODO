@@ -1,25 +1,14 @@
-
 -add + operator to rule expr (parse_RuleGroup)
   DONE-figure out why the whitespace is necessary D:
   -add to Parsers.hs
 -add validation
   -pattern match validation
   -late rule validation
-DONE/IGNORE-switch non op character operators to use reserved instead of reservedOp
-
--add commands
-  -cancel
-  -win
-  -message
-  -again?
-  -restart?
-  -checkpoint?
+-add support for pattern -> pattern command (e.g.  [ > Player | Person ] -> [ < Player | Person ] message Woah, buddy, back off!)
 -add input conditionals
   -engine interface
   DONE-vty hookups
--add support for boolean vars
 -double check there are trys to all token parsers inside of <|> where needed
--add sounds
 -potato math
   -do rot
   DONE-improve TR unit tests
@@ -29,8 +18,23 @@ DONE/IGNORE-switch non op character operators to use reserved instead of reserve
   -use_relative_player
     -sausage roll movement
   -require_player_movement
+-add support for boolean vars
+-add sounds
 -add rigid and start/endLoop parsing to rules
+-add support for time based nonsense
+  -again command
+  -realtime_interval prelude
 
+DONE/IGNORE-switch non op character operators to use reserved instead of reservedOp
+DONE-figure out if reserved names are case sensitive or not
+  -looks like it's not case sensitive
+DONE-add commands
+  -cancel
+  -win
+  -message
+  IGNORE-again?
+  IGNORE-restart?
+  IGNORE-checkpoint?
 DONE-remove support for coercing velocity/orientation to the other type
   -these are specified in the constants
 DONE-remove case sensitivity I guess..
